@@ -1,0 +1,11 @@
+# Dependências de pacotes
+node_modules/
+
+# Variáveis locais e senhas
+.env
+.env.local
+
+# Arquivos de log e sistema
+npm-debug.log*
+.DS_Store
+dist/
