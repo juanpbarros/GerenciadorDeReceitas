@@ -1,6 +1,10 @@
 # Dependências de pacotes
 node_modules/
 
+# caches / logs locais
+.npm-cache/
+.logs/
+
 # Variáveis locais e senhas
 .env
 .env.local

@@ -1,0 +1,9 @@
+{
+  "name": "gerenciador-de-receitas",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
+
