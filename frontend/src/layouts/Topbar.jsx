@@ -19,59 +19,74 @@ export default function Topbar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-4 px-4">
-        <Link to={user ? '/' : '/login'} className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white">R</span>
-          <span className="hidden sm:inline">Sistema de Receitas</span>
+    <nav className="navbar navbar-expand-lg bg-white border-bottom fixed-top app-topbar">
+      <div className="container-fluid">
+        <Link to={user ? '/' : '/login'} className="navbar-brand d-flex align-items-center gap-2 fw-semibold">
+          <span className="d-inline-flex align-items-center justify-content-center rounded-3 text-white"
+            style={{ width: 36, height: 36, background: '#0b1220' }}
+          >
+            R
+          </span>
+          <span className="d-none d-sm-inline">Sistema de Receitas</span>
         </Link>
 
-        {showSearch && (
-          <div className="hidden w-full max-w-md md:block">
-            <label className="sr-only" htmlFor="topbar-search">Buscar receitas</label>
-            <input
-              id="topbar-search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar receitas..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none ring-slate-900/10 focus:bg-white focus:ring-4"
-            />
-          </div>
-        )}
+        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topbarNav" aria-controls="topbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span className="navbar-toggler-icon" />
+        </button>
 
-        <div className="flex flex-1 items-center justify-end gap-3">
-          {user ? (
-            <>
-              <Link
-                to="/receitas/nova"
-                className="hidden rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 md:inline"
-              >
-                + Nova receita
-              </Link>
-              <Link to="/perfil" className="text-sm font-medium text-slate-800 hover:text-slate-900">
-                {user.nome}
-              </Link>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
-              >
-                Sair
-              </button>
-            </>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login" className="rounded-xl px-3 py-2 text-sm font-medium text-slate-800 hover:bg-slate-100">
-                Entrar
-              </Link>
-              <Link to="/register" className="rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800">
-                Cadastrar
-              </Link>
-            </div>
+        <div className="collapse navbar-collapse" id="topbarNav">
+          <div className="ms-lg-3 me-auto" />
+
+          {showSearch && (
+            <form className="d-none d-lg-block me-3" role="search" style={{ width: 420, maxWidth: '42vw' }}>
+              <label className="visually-hidden" htmlFor="topbar-search">Buscar receitas</label>
+              <input
+                id="topbar-search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="form-control"
+                placeholder="Buscar receitas..."
+              />
+            </form>
           )}
+
+          <ul className="navbar-nav align-items-lg-center gap-2">
+            {user ? (
+              <>
+                <li className="nav-item">
+                  <Link to="/receitas/nova" className="btn btn-dark btn-sm">
+                    + Nova receita
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/perfil" className="nav-link fw-medium">
+                    {user.nome}
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <button type="button" className="btn btn-outline-dark btn-sm" onClick={handleLogout}>
+                    Sair
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link to="/login" className="nav-link">
+                    Entrar
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/register" className="btn btn-dark btn-sm">
+                    Cadastrar
+                  </Link>
+                </li>
+              </>
+            )}
+          </ul>
         </div>
       </div>
-    </header>
+    </nav>
   )
 }
 

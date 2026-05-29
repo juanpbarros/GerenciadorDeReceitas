@@ -18,30 +18,28 @@ export default function RecipeForm({ mode }) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold">{isEdit ? 'Editar receita' : 'Nova receita'}</h2>
-      <p className="mt-1 text-sm text-slate-600">
-        Formulário inicial (ainda sem salvar no backend).
-      </p>
+      <h2 className="h4 mb-1">{isEdit ? 'Editar receita' : 'Nova receita'}</h2>
+      <p className="text-secondary mb-4">Formulário inicial (ainda sem salvar no backend).</p>
 
-      <form className="mt-6 space-y-4">
-        <div>
-          <label className="text-sm font-medium text-slate-700" htmlFor="title">Título</label>
+      <form className="row g-3">
+        <div className="col-12">
+          <label className="form-label" htmlFor="title">Título</label>
           <input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-slate-900/10 focus:ring-4"
+            className="form-control"
             placeholder="Ex: Bolo de chocolate"
           />
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-slate-700" htmlFor="category">Categoria</label>
+        <div className="col-12 col-md-6">
+          <label className="form-label" htmlFor="category">Categoria</label>
           <select
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-slate-900/10 focus:ring-4"
+            className="form-select"
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>{c}</option>
@@ -49,8 +47,10 @@ export default function RecipeForm({ mode }) {
           </select>
         </div>
 
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-          Próxima etapa: campos dinâmicos para ingredientes e modo de preparo (listas de strings).
+        <div className="col-12">
+          <div className="p-3 bg-light border rounded-4">
+            Próxima etapa: campos dinâmicos para ingredientes e modo de preparo (listas de strings).
+          </div>
         </div>
       </form>
     </div>

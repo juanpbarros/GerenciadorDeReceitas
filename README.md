@@ -5,6 +5,7 @@ Sistema web de receitas desenvolvido **incrementalmente** (por etapas pequenas),
 ## Stack (obrigatória)
 
 - Frontend: React + Vite
+- UI: Bootstrap + CSS (sem Tailwind)
 - Backend: Node.js + Express
 - Banco: MongoDB (Mongoose)
 - Autenticação: JWT + bcrypt
@@ -19,12 +20,12 @@ Sistema web de receitas desenvolvido **incrementalmente** (por etapas pequenas),
 
 ## O que já foi feito (Etapa 1 — Frontend base)
 
-- Layout moderno com **Topbar** e **Sidebar** (área autenticada).
+- Layout moderno com **Topbar** e **Sidebar** (área autenticada), com sidebar “colada” na lateral.
 - Rotas:
-  - Pública: `GET /login`, `GET /register`
-  - Autenticada (protegida): `GET /`, `GET /receitas`, `GET /receitas/nova`, `GET /favoritos`, `GET /lista-compras`, `GET /historico`, `GET /perfil`
+  - Pública: `/login`, `/register`
+  - Autenticada (protegida): `/`, `/receitas`, `/receitas/nova`, `/favoritos`, `/lista-compras`, `/historico`, `/perfil`
 - Auth **mock** com persistência em `localStorage` (para demonstrar fluxo no frontend antes do backend).
-- Tailwind CSS configurado (PostCSS compatível com Tailwind v4).
+- Bootstrap + CSS configurados.
 - Testes automatizados iniciais:
   - Redireciona para `/login` quando não autenticado
   - Renderiza dashboard quando autenticado
@@ -70,3 +71,4 @@ Próximas etapas sugeridas:
 
 - As categorias serão pré-definidas (sem CRUD): Café da manhã, Almoço, Jantar, Sobremesa, Massas, Bebidas, Saladas, Lanches.
 - Ingredientes e modo de preparo serão listas de strings (sem CRUD próprio).
+

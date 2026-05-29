@@ -2,18 +2,19 @@ import { Outlet } from 'react-router-dom'
 
 export default function PublicLayout() {
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md">
-          <div className="mb-6 text-center">
-            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
-              R
-            </div>
-            <h1 className="text-xl font-semibold tracking-tight">Sistema de Receitas</h1>
-            <p className="mt-1 text-sm text-slate-600">Acesse sua conta para continuar</p>
+    <div className="auth-shell d-flex align-items-center justify-content-center px-3 py-5">
+      <div className="w-100" style={{ maxWidth: 420 }}>
+        <div className="text-center mb-4">
+          <div
+            className="mx-auto d-flex align-items-center justify-content-center rounded-4 text-white fw-semibold mb-2"
+            style={{ width: 44, height: 44, background: '#0b1220' }}
+          >
+            R
           </div>
-          <Outlet />
+          <h1 className="h5 mb-1">Sistema de Receitas</h1>
+          <p className="text-secondary mb-0">Acesse sua conta para continuar</p>
         </div>
+        <Outlet />
       </div>
     </div>
   )

@@ -16,73 +16,70 @@ export default function Register() {
     try {
       await register(name, email, password)
       navigate('/')
-    } catch (err) {
+    } catch {
       setError('Não foi possível cadastrar. Tente novamente.')
     }
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold">Cadastro</h2>
-      <p className="mt-1 text-sm text-slate-600">Crie sua conta para salvar receitas.</p>
+    <div className="auth-card bg-white p-4">
+      <h2 className="h5 mb-1">Cadastro</h2>
+      <p className="text-secondary mb-3">Crie sua conta para salvar receitas.</p>
 
       {error && (
-        <div role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+        <div role="alert" className="alert alert-danger py-2">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+      <form onSubmit={handleSubmit} className="d-grid gap-3">
         <div>
-          <label className="text-sm font-medium text-slate-700" htmlFor="name">Nome</label>
+          <label className="form-label" htmlFor="name">Nome</label>
           <input
             id="name"
             type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-slate-900/10 focus:ring-4"
+            className="form-control"
             placeholder="Seu nome"
           />
         </div>
+
         <div>
-          <label className="text-sm font-medium text-slate-700" htmlFor="email">Email</label>
+          <label className="form-label" htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-slate-900/10 focus:ring-4"
+            className="form-control"
             placeholder="voce@email.com"
           />
         </div>
+
         <div>
-          <label className="text-sm font-medium text-slate-700" htmlFor="password">Senha</label>
+          <label className="form-label" htmlFor="password">Senha</label>
           <input
             id="password"
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none ring-slate-900/10 focus:ring-4"
+            className="form-control"
             placeholder="Crie uma senha"
           />
         </div>
-        <button
-          type="submit"
-          className="w-full rounded-xl bg-slate-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
-        >
+
+        <button type="submit" className="btn btn-dark">
           Cadastrar
         </button>
       </form>
 
-      <p className="mt-4 text-center text-sm text-slate-600">
-        Já tem conta?{' '}
-        <Link className="font-medium text-slate-900 underline underline-offset-4" to="/login">
-          Entrar
-        </Link>
-      </p>
+      <div className="text-center mt-3 small text-secondary">
+        Já tem conta? <Link to="/login" className="link-dark fw-semibold">Entrar</Link>
+      </div>
     </div>
   )
 }

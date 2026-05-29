@@ -1,8 +1,8 @@
 export default function Favorites() {
   return (
     <div>
-      <h2 className="text-lg font-semibold">Favoritos</h2>
-      <p className="mt-1 text-sm text-slate-600">Em breve: lista de receitas favoritadas pelo usuário.</p>
+      <h2 className="h4 mb-1">Favoritos</h2>
+      <p className="text-secondary mb-0">Em breve: lista de receitas favoritadas pelo usuário.</p>
     </div>
   )
 }

@@ -1,9 +1,75 @@
-@import "tailwindcss";
-
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900;
+  background: #f6f7fb;
+}
+
+.app-topbar {
+  height: 56px;
+}
+
+.app-layout {
+  padding-top: 56px;
+}
+
+.app-sidebar {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  height: calc(100vh - 56px);
+  width: 280px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+}
+
+.app-content {
+  margin-left: 280px;
+  min-height: calc(100vh - 56px);
+}
+
+.sidebar-link {
+  border-radius: 0.75rem;
+}
+
+.sidebar-link.active {
+  background: #0b1220;
+  color: #fff !important;
+}
+
+.content-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(13, 18, 32, 0.06);
+}
+
+.auth-shell {
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(13, 110, 253, 0.12), transparent 60%),
+    radial-gradient(900px 500px at 80% 30%, rgba(111, 66, 193, 0.10), transparent 55%),
+    #f6f7fb;
+}
+
+.auth-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 12px 30px rgba(13, 18, 32, 0.08);
+}
+
+@media (max-width: 991.98px) {
+  .app-sidebar {
+    position: static;
+    width: auto;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .app-content {
+    margin-left: 0;
+  }
 }
