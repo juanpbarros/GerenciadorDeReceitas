@@ -76,3 +76,52 @@ describe('recipes listing', () => {
     expect(screen.getByText(/1 receita encontrada/i)).toBeInTheDocument()
   })
 })
+
+describe('recipe form', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+  })
+
+  it('adds dynamic ingredient and preparation step fields', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/nova')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/ingrediente 1/i), '2 ovos')
+    await user.click(screen.getByRole('button', { name: /\+ adicionar ingrediente/i }))
+    await user.type(screen.getByLabelText(/ingrediente 2/i), '1 xícara de leite')
+
+    await user.type(screen.getByLabelText(/etapa 1/i), 'Misture os ingredientes')
+    await user.click(screen.getByRole('button', { name: /\+ adicionar etapa/i }))
+    await user.type(screen.getByLabelText(/etapa 2/i), 'Leve ao forno')
+
+    expect(screen.getByDisplayValue('2 ovos')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('1 xícara de leite')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Misture os ingredientes')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Leve ao forno')).toBeInTheDocument()
+  })
+
+  it('shows validation message when required recipe fields are empty', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/nova')
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: /salvar receita/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/preencha título/i)
+  })
+
+  it('accepts a minimally valid recipe form', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/nova')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/título/i), 'Bolo simples')
+    await user.type(screen.getByLabelText(/ingrediente 1/i), '2 ovos')
+    await user.type(screen.getByLabelText(/etapa 1/i), 'Misture tudo')
+    await user.click(screen.getByRole('button', { name: /salvar receita/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/pronta para integração/i)
+  })
+})
