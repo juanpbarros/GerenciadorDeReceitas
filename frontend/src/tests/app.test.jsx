@@ -125,3 +125,49 @@ describe('recipe form', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/pronta para integração/i)
   })
 })
+
+describe('shopping list form', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+  })
+
+  it('adds dynamic shopping list items and marks an item as purchased', async () => {
+    const user = userEvent.setup()
+    setRoute('/lista-compras')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/nome da lista/i), 'Compras do bolo')
+    await user.type(screen.getByLabelText(/item de compra 1/i), 'farinha')
+    await user.click(screen.getByRole('button', { name: /\+ adicionar item/i }))
+    await user.type(screen.getByLabelText(/item de compra 2/i), 'fermento')
+    await user.click(screen.getByRole('checkbox', { name: /marcar item 2 como comprado/i }))
+
+    expect(screen.getByDisplayValue('Compras do bolo')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('farinha')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('fermento')).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /marcar item 2 como comprado/i })).toBeChecked()
+  })
+
+  it('shows validation message when shopping list is incomplete', async () => {
+    const user = userEvent.setup()
+    setRoute('/lista-compras')
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: /salvar lista/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/preencha o nome da lista/i)
+  })
+
+  it('accepts a minimally valid shopping list', async () => {
+    const user = userEvent.setup()
+    setRoute('/lista-compras')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/nome da lista/i), 'Compras da semana')
+    await user.type(screen.getByLabelText(/item de compra 1/i), 'leite')
+    await user.click(screen.getByRole('button', { name: /salvar lista/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/lista de compras pronta/i)
+  })
+})
