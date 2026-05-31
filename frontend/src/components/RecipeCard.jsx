@@ -1,21 +1,25 @@
 import { Link } from 'react-router-dom'
-import { Card } from 'react-bootstrap'
 import StarRating from './StarRating'
 
 export default function RecipeCard({ recipe }) {
   return (
-    <Card as={Link} to={`/receitas/${recipe._id}`} className="text-decoration-none h-100 border-0 shadow-sm">
-      <Card.Body>
-        <div className="d-flex justify-content-between align-items-start mb-2">
-          <span className="badge bg-dark bg-opacity-10 text-dark">{recipe.categoria?.nome}</span>
-          <StarRating rating={recipe.avaliacaoMedia} />
+    <Link to={`/receitas/${recipe.id}`} className="recipe-card d-block h-100 text-decoration-none text-dark">
+      <div className="recipe-card-body">
+        <div className="d-flex justify-content-between align-items-start gap-2 mb-3">
+          <span className="badge text-bg-light border">{recipe.category}</span>
+          <StarRating rating={recipe.rating} />
         </div>
-        <Card.Title className="text-dark mb-1">{recipe.nome}</Card.Title>
-        <Card.Text className="text-muted small mb-3">{recipe.descricao}</Card.Text>
-        <div className="text-muted small">
-          {recipe.tempoPreparo}min · {recipe.porcoes} porções
+        <h3 className="h5 mb-2">{recipe.title}</h3>
+        <p className="text-secondary small mb-3">{recipe.description}</p>
+        <div className="d-flex flex-wrap gap-2 small text-secondary">
+          <span>{recipe.prepTimeMinutes} min</span>
+          <span>•</span>
+          <span>{recipe.ingredients.length} ingredientes</span>
+          <span>•</span>
+          <span>{recipe.creator}</span>
         </div>
-      </Card.Body>
-    </Card>
+      </div>
+    </Link>
   )
 }
+

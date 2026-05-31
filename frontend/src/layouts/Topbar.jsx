@@ -39,11 +39,12 @@ export default function Topbar() {
 
           {showSearch && (
             <form className="d-none d-lg-block me-3" role="search" style={{ width: 420, maxWidth: '42vw' }}>
-              <label className="visually-hidden" htmlFor="topbar-search">Buscar receitas</label>
+              <label className="visually-hidden" htmlFor="topbar-search">Busca global de receitas</label>
               <input
                 id="topbar-search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                aria-label="Busca global de receitas"
                 className="form-control"
                 placeholder="Buscar receitas..."
               />
@@ -89,4 +90,3 @@ export default function Topbar() {
     </nav>
   )
 }
-

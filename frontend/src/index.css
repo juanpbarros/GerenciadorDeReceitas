@@ -47,6 +47,28 @@ body {
   box-shadow: 0 10px 25px rgba(13, 18, 32, 0.06);
 }
 
+.recipe-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(13, 18, 32, 0.05);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.recipe-card:hover {
+  border-color: rgba(13, 18, 32, 0.18);
+  box-shadow: 0 12px 26px rgba(13, 18, 32, 0.09);
+  transform: translateY(-2px);
+}
+
+.recipe-card-body {
+  padding: 1rem;
+}
+
+.empty-state {
+  min-height: 140px;
+}
+
 .auth-shell {
   min-height: 100vh;
   background: radial-gradient(1200px 600px at 20% 10%, rgba(13, 110, 253, 0.12), transparent 60%),

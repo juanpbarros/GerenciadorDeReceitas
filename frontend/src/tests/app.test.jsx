@@ -35,3 +35,44 @@ describe('routing/auth', () => {
     expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
   })
 })
+
+describe('recipes listing', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+  })
+
+  it('renders recipe cards from mock data', () => {
+    setRoute('/receitas')
+    render(<App />)
+
+    expect(screen.getByRole('heading', { name: /^Receitas$/ })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Bolo de cenoura/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Macarrão alho e óleo/i })).toBeInTheDocument()
+    expect(screen.getByText(/6 receitas encontradas/i)).toBeInTheDocument()
+  })
+
+  it('filters recipes by search text', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas')
+    render(<App />)
+
+    await user.type(screen.getByRole('textbox', { name: /buscar receitas/i }), 'omelete')
+
+    expect(screen.getByRole('link', { name: /Omelete simples/i })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Bolo de cenoura/i })).not.toBeInTheDocument()
+    expect(screen.getByText(/1 receita encontrada/i)).toBeInTheDocument()
+  })
+
+  it('filters recipes by category', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas')
+    render(<App />)
+
+    await user.selectOptions(screen.getByRole('combobox', { name: /filtrar por categoria/i }), 'Bebidas')
+
+    expect(screen.getByRole('link', { name: /Suco de abacaxi com hortelã/i })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Tapioca com queijo/i })).not.toBeInTheDocument()
+    expect(screen.getByText(/1 receita encontrada/i)).toBeInTheDocument()
+  })
+})
