@@ -27,9 +27,9 @@ export default function Recipes() {
     <div>
       <div className="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
         <div>
-          <h2 className="h4 mb-1">Receitas</h2>
+          <h2 className="h4 mb-1">Minha biblioteca de receitas</h2>
           <p className="text-secondary mb-0">
-            Explore receitas cadastradas e filtre por busca ou categoria.
+            Organize suas receitas e as receitas adicionadas por compartilhamento.
           </p>
         </div>
         <Link to="/receitas/nova" className="btn btn-dark align-self-start align-self-lg-center">

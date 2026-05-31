@@ -46,10 +46,18 @@ describe('recipes listing', () => {
     setRoute('/receitas')
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: /^Receitas$/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Bolo de cenoura/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Macarrão alho e óleo/i })).toBeInTheDocument()
     expect(screen.getByText(/6 receitas encontradas/i)).toBeInTheDocument()
+  })
+
+  it('shows source only for recipes added from another person', () => {
+    setRoute('/receitas')
+    render(<App />)
+
+    expect(screen.queryByText(/Receita de Maria/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/Receita de Rafaela/i)).toBeInTheDocument()
   })
 
   it('filters recipes by search text', async () => {
@@ -171,3 +179,4 @@ describe('shopping list form', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/lista de compras pronta/i)
   })
 })
+
