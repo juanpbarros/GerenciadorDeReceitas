@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import CommentForm from '../components/CommentForm'
 import { MOCK_RECIPES } from '../data/mockRecipes'
 
 export default function RecipeDetail() {
@@ -54,6 +55,10 @@ export default function RecipeDetail() {
       <div className="mt-4 p-3 bg-light border rounded-3 d-flex flex-wrap gap-3 text-secondary small">
         <span>Tempo: {recipe.prepTimeMinutes} min</span>
         <span>Nota: {recipe.rating}</span>
+      </div>
+
+      <div className="mt-4">
+        <CommentForm />
       </div>
     </div>
   )

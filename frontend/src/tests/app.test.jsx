@@ -180,3 +180,32 @@ describe('shopping list form', () => {
   })
 })
 
+describe('comment form', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+  })
+
+  it('shows validation message when comment form is incomplete', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/preencha o comentário/i)
+  })
+
+  it('accepts a valid comment and rating', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/comentário/i), 'Ficou muito bom')
+    await user.selectOptions(screen.getByLabelText(/nota/i), '5')
+    await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/comentário pronto/i)
+  })
+})
+
