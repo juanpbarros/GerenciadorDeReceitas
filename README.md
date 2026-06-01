@@ -1,74 +1,144 @@
 # Sistema Web de Receitas (Trabalho Escolar)
 
-Sistema web de receitas desenvolvido **incrementalmente** (por etapas pequenas), com **testes automatizados** criados e executados a cada etapa.
+Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequenas, com **testes automatizados** criados e executados junto de cada funcionalidade.
 
-## Stack (obrigatória)
+## Stack do projeto
 
 - Frontend: React + Vite
-- UI: Bootstrap + CSS (sem Tailwind)
+- UI: Bootstrap + CSS
 - Backend: Node.js + Express
-- Banco: MongoDB (Mongoose)
+- Banco de dados: MongoDB com Mongoose
 - Autenticação: JWT + bcrypt
 - Testes:
   - Frontend: Jest + React Testing Library
-  - Backend: Jest + Supertest (planejado)
+  - Backend: Jest + Supertest
 
 ## Estrutura do repositório
 
-- `frontend/` — aplicação React (Vite)
-- `backend/` — API Node/Express (em construção)
+- `frontend/` — aplicação React com Vite
+- `backend/` — API Node.js com Express
+- `.env.exemplo` — modelo de variáveis de ambiente
+- `README.md` — documentação do projeto
 
-## O que já foi feito (Etapa 1 — Frontend base)
+## Status atual
 
-- Layout moderno com **Topbar** e **Sidebar** (área autenticada), com sidebar “colada” na lateral.
-- Rotas:
-  - Pública: `/login`, `/register`
-  - Autenticada (protegida): `/`, `/receitas`, `/receitas/nova`, `/favoritos`, `/lista-compras`, `/historico`, `/perfil`
-- Auth **mock** com persistência em `localStorage` (para demonstrar fluxo no frontend antes do backend).
-- Bootstrap + CSS configurados.
-- Testes automatizados iniciais:
-  - Redireciona para `/login` quando não autenticado
-  - Renderiza dashboard quando autenticado
-  - Logout retorna para `/login`
+### Frontend base
 
-## Como acessar (Frontend)
+- Layout autenticado com Topbar e Sidebar.
+- Sidebar conectada ao canto da tela, usando Bootstrap + CSS.
+- Rotas públicas para login e cadastro.
+- Rotas protegidas para dashboard, receitas, favoritos, lista de compras, histórico e perfil.
+- Autenticação mock com `localStorage`, apenas para simular o fluxo visual antes da integração com o backend.
+- Listagem mock de receitas com busca e filtro por categoria.
+- Testes automatizados iniciais do fluxo de autenticação e navegação.
+
+### Backend base
+
+- API Express configurada.
+- Estrutura inicial em `src/` com controllers, routes, middlewares e tests.
+- Rota de saúde disponível em `GET /api/health`.
+- Middleware para rota não encontrada.
+- Middleware central de erro.
+- Testes automatizados com Jest + Supertest.
+
+## Como rodar o projeto
 
 Pré-requisitos:
-- Node.js instalado (recomendado LTS)
 
-Rodar o frontend:
+- Node.js instalado, de preferência versão LTS.
+- MongoDB será necessário nas próximas etapas do backend com banco real.
+
+### Rodar o frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Abrir no navegador:
+Acesse:
+
 - `http://localhost:5173`
 
-Login (mock):
-- Email: qualquer (ex.: `joao@email.com`)
-- Senha: qualquer (ex.: `123456`)
+Login mock:
+
+- Email: qualquer email, por exemplo `joao@email.com`
+- Senha: qualquer senha, por exemplo `123456`
+
+### Rodar o backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+A API sobe por padrão em:
+
+- `http://localhost:3000`
+
+Healthcheck:
+
+- `GET http://localhost:3000/api/health`
+
+Resposta esperada:
+
+```json
+{
+  "ok": true
+}
+```
+
+## Testes automatizados
 
 Rodar testes do frontend:
+
 ```bash
 cd frontend
 npm test
 ```
 
-## O que falta fazer (roadmap resumido)
+Rodar testes do backend:
 
-O desenvolvimento continuará em **etapas pequenas** com testes a cada entrega.
+```bash
+cd backend
+npm test
+```
 
-Próximas etapas sugeridas:
-1. Frontend: página de **Receitas** com cards (mock), busca e filtro por categoria + testes.
-2. Backend: bootstrap do Express + testes (healthcheck).
-3. Backend: autenticação real (register/login/me) + testes; integrar frontend com backend.
-4. Backend + Frontend: CRUD de receitas (com permissões do dono) + testes.
-5. Comentários/avaliações, Favoritos, Lista de compras, Histórico (sempre com testes).
+## Funcionalidades planejadas
 
-## Observações
+- Autenticação real com cadastro, login, logout, JWT e senha criptografada.
+- CRUD de receitas com ingredientes e modo de preparo em campos dinâmicos.
+- Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
+- Comentários e avaliações.
+- Favoritos individuais por usuário.
+- Checklist para fazer receita e identificar ingredientes faltantes.
+- Lista de compras gerada a partir dos ingredientes faltantes.
+- Histórico de receitas feitas.
+- Compartilhamento de receitas por link e Web Share API quando disponível.
 
-- As categorias serão pré-definidas (sem CRUD): Café da manhã, Almoço, Jantar, Sobremesa, Massas, Bebidas, Saladas, Lanches.
-- Ingredientes e modo de preparo serão listas de strings (sem CRUD próprio).
+## Roadmap incremental
 
+1. Frontend: completar os formulários principais e ajustar biblioteca pessoal de receitas.
+2. Backend: implementar autenticação com JWT e testes.
+3. Backend: implementar CRUD de receitas com regras de dono e testes.
+4. Frontend: integrar autenticação e receitas com a API.
+5. Implementar comentários, favoritos, lista de compras e histórico em etapas separadas.
+
+## Observações de regra de negócio
+
+- Categorias são pré-definidas e não terão CRUD próprio.
+- Ingredientes não terão CRUD próprio; serão salvos como lista de strings dentro da receita.
+- Modo de preparo também será salvo como lista de strings dentro da receita.
+- Receitas próprias aparecem como parte da biblioteca do usuário.
+- Receitas de outras pessoas adicionadas à biblioteca devem indicar o autor original, por exemplo: `Receita de Rafaela`.
+
+## Controle de versão
+
+O projeto está sendo desenvolvido com commits pequenos e organizados.
+
+Esta branch de backend base deve fechar a issue `#3` quando o Pull Request for aberto ou atualizado com:
+
+```txt
+Closes #3
+```
