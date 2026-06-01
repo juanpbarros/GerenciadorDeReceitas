@@ -209,3 +209,34 @@ describe('comment form', () => {
   })
 })
 
+describe('history form', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+  })
+
+  it('shows validation message when history form is incomplete', async () => {
+    const user = userEvent.setup()
+    setRoute('/historico')
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: /salvar histórico/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/selecione uma receita/i)
+  })
+
+  it('accepts a minimally valid history record', async () => {
+    const user = userEvent.setup()
+    setRoute('/historico')
+    render(<App />)
+
+    await user.selectOptions(screen.getByLabelText(/receita feita/i), 'bolo-cenoura')
+    await user.type(screen.getByLabelText(/^data$/i), '2026-05-31')
+    await user.selectOptions(screen.getByLabelText(/nota pessoal opcional/i), '5')
+    await user.type(screen.getByLabelText(/observação opcional/i), 'Ficou ótimo para o café.')
+    await user.click(screen.getByRole('button', { name: /salvar histórico/i }))
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/registro de histórico pronto/i)
+  })
+})
+
