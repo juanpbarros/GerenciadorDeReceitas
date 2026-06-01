@@ -18,7 +18,8 @@ export const MOCK_RECIPES = [
     preparationSteps: ['Bata cenoura, ovos e óleo.', 'Misture com os secos.', 'Asse até dourar.'],
     prepTimeMinutes: 45,
     category: 'Sobremesa',
-    creator: 'Maria',
+    origin: 'own',
+    sourceName: null,
     rating: 4.8,
   },
   {
@@ -29,7 +30,8 @@ export const MOCK_RECIPES = [
     preparationSteps: ['Cozinhe o macarrão.', 'Doure o alho no azeite.', 'Misture tudo e finalize.'],
     prepTimeMinutes: 20,
     category: 'Massas',
-    creator: 'João',
+    origin: 'own',
+    sourceName: null,
     rating: 4.4,
   },
   {
@@ -40,7 +42,8 @@ export const MOCK_RECIPES = [
     preparationSteps: ['Bata os ovos.', 'Misture os recheios.', 'Leve à frigideira.'],
     prepTimeMinutes: 10,
     category: 'Café da manhã',
-    creator: 'Ana',
+    origin: 'own',
+    sourceName: null,
     rating: 4.2,
   },
   {
@@ -51,7 +54,8 @@ export const MOCK_RECIPES = [
     preparationSteps: ['Higienize as folhas.', 'Corte as frutas.', 'Misture e tempere.'],
     prepTimeMinutes: 15,
     category: 'Saladas',
-    creator: 'Carla',
+    origin: 'imported',
+    sourceName: 'Carla',
     rating: 4.6,
   },
   {
@@ -62,7 +66,8 @@ export const MOCK_RECIPES = [
     preparationSteps: ['Bata tudo no liquidificador.', 'Coe se desejar.', 'Sirva gelado.'],
     prepTimeMinutes: 5,
     category: 'Bebidas',
-    creator: 'Rafael',
+    origin: 'imported',
+    sourceName: 'Rafaela',
     rating: 4.7,
   },
   {
@@ -73,7 +78,8 @@ export const MOCK_RECIPES = [
     preparationSteps: ['Aqueça a frigideira.', 'Espalhe a tapioca.', 'Recheie e dobre.'],
     prepTimeMinutes: 8,
     category: 'Lanches',
-    creator: 'Bianca',
+    origin: 'own',
+    sourceName: null,
     rating: 4.1,
   },
 ]

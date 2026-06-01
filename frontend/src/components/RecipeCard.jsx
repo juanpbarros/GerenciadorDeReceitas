@@ -15,8 +15,12 @@ export default function RecipeCard({ recipe }) {
           <span>{recipe.prepTimeMinutes} min</span>
           <span>•</span>
           <span>{recipe.ingredients.length} ingredientes</span>
-          <span>•</span>
-          <span>{recipe.creator}</span>
+          {recipe.origin === 'imported' && recipe.sourceName && (
+            <>
+              <span>•</span>
+              <span>Receita de {recipe.sourceName}</span>
+            </>
+          )}
         </div>
       </div>
     </Link>

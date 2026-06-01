@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import CommentForm from '../components/CommentForm'
 import { MOCK_RECIPES } from '../data/mockRecipes'
 
 export default function RecipeDetail() {
@@ -22,6 +23,9 @@ export default function RecipeDetail() {
           <span className="badge text-bg-light border mb-2">{recipe.category}</span>
           <h2 className="h4 mb-1">{recipe.title}</h2>
           <p className="text-secondary mb-0">{recipe.description}</p>
+          {recipe.origin === 'imported' && recipe.sourceName && (
+            <p className="text-secondary small mt-2 mb-0">Receita de {recipe.sourceName}</p>
+          )}
         </div>
         <Link to={`/receitas/${id}/editar`} className="btn btn-outline-dark">
           Editar
@@ -50,8 +54,11 @@ export default function RecipeDetail() {
 
       <div className="mt-4 p-3 bg-light border rounded-3 d-flex flex-wrap gap-3 text-secondary small">
         <span>Tempo: {recipe.prepTimeMinutes} min</span>
-        <span>Criador: {recipe.creator}</span>
         <span>Nota: {recipe.rating}</span>
+      </div>
+
+      <div className="mt-4">
+        <CommentForm />
       </div>
     </div>
   )

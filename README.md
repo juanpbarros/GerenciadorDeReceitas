@@ -22,7 +22,7 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 
 ## Status atual
 
-### Frontend base
+### Frontend
 
 - Layout autenticado com Topbar e Sidebar.
 - Sidebar conectada ao canto da tela, usando Bootstrap + CSS.
@@ -30,9 +30,15 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Rotas protegidas para dashboard, receitas, favoritos, lista de compras, histórico e perfil.
 - Autenticação mock com `localStorage`, apenas para simular o fluxo visual antes da integração com o backend.
 - Listagem mock de receitas com busca e filtro por categoria.
-- Testes automatizados iniciais do fluxo de autenticação e navegação.
+- Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
+- Exibição de autoria apenas para receitas adicionadas de outras pessoas, por exemplo: `Receita de Rafaela`.
+- Formulário de receita com ingredientes e modo de preparo em campos dinâmicos.
+- Formulário de lista de compras com itens dinâmicos e status comprado/não comprado.
+- Formulário de comentários e avaliações com nota de 1 a 5.
+- Formulário de histórico de receitas feitas com data, observação e nota pessoal opcional.
+- Testes automatizados para autenticação mock, listagem, filtros e formulários principais.
 
-### Backend base
+### Backend
 
 - API Express configurada.
 - Estrutura inicial em `src/` com controllers, routes, middlewares e tests.
@@ -46,7 +52,7 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 Pré-requisitos:
 
 - Node.js instalado, de preferência versão LTS.
-- MongoDB será necessário nas próximas etapas do backend com banco real.
+- MongoDB Atlas será usado nas próximas etapas do backend com banco real.
 
 ### Rodar o frontend
 
@@ -107,23 +113,27 @@ npm test
 
 ## Funcionalidades planejadas
 
+- Conexão com MongoDB Atlas usando variáveis de ambiente.
+- Pipeline de CI com GitHub Actions.
 - Autenticação real com cadastro, login, logout, JWT e senha criptografada.
-- CRUD de receitas com ingredientes e modo de preparo em campos dinâmicos.
-- Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
-- Comentários e avaliações.
+- CRUD real de receitas no backend.
+- Integração do frontend com a API.
 - Favoritos individuais por usuário.
 - Checklist para fazer receita e identificar ingredientes faltantes.
 - Lista de compras gerada a partir dos ingredientes faltantes.
-- Histórico de receitas feitas.
+- Histórico persistido de receitas feitas.
 - Compartilhamento de receitas por link e Web Share API quando disponível.
+- Deploy do frontend e backend.
 
 ## Roadmap incremental
 
-1. Frontend: completar os formulários principais e ajustar biblioteca pessoal de receitas.
-2. Backend: implementar autenticação com JWT e testes.
-3. Backend: implementar CRUD de receitas com regras de dono e testes.
-4. Frontend: integrar autenticação e receitas com a API.
-5. Implementar comentários, favoritos, lista de compras e histórico em etapas separadas.
+1. Finalizar o PR dos formulários principais e da biblioteca pessoal.
+2. Configurar CI com GitHub Actions.
+3. Configurar conexão com MongoDB Atlas.
+4. Implementar autenticação com JWT e testes.
+5. Implementar CRUD de receitas com regras de dono e testes.
+6. Integrar autenticação e receitas do frontend com a API.
+7. Implementar comentários, favoritos, lista de compras e histórico com backend real.
 
 ## Observações de regra de negócio
 
@@ -131,14 +141,25 @@ npm test
 - Ingredientes não terão CRUD próprio; serão salvos como lista de strings dentro da receita.
 - Modo de preparo também será salvo como lista de strings dentro da receita.
 - Receitas próprias aparecem como parte da biblioteca do usuário.
-- Receitas de outras pessoas adicionadas à biblioteca devem indicar o autor original, por exemplo: `Receita de Rafaela`.
+- Receitas de outras pessoas adicionadas à biblioteca devem indicar o autor original.
+- O nome do autor original aparece apenas quando a receita foi adicionada de outra pessoa.
+
+## Segurança e variáveis de ambiente
+
+- O arquivo `.env` real não deve ser commitado.
+- Credenciais do MongoDB Atlas, `JWT_SECRET` e URLs de produção devem ficar apenas no ambiente local ou no serviço de deploy.
+- O repositório deve manter apenas exemplos seguros, como `.env.exemplo`.
+- Antes de qualquer commit envolvendo backend, banco ou deploy, conferir `git status` para evitar subir segredos.
 
 ## Controle de versão
 
 O projeto está sendo desenvolvido com commits pequenos e organizados.
 
-Esta branch de backend base deve fechar a issue `#3` quando o Pull Request for aberto ou atualizado com:
+Esta branch de formulários principais deve fechar as issues de formulários e regra de negócio quando o Pull Request for aberto ou atualizado com:
 
 ```txt
-Closes #3
+Closes #1
+Closes #2
 ```
+
+Se os números das issues forem diferentes, substitua `#1` e `#2` pelos números corretos no PR.
