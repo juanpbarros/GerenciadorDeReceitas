@@ -12,11 +12,13 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Testes:
   - Frontend: Jest + React Testing Library
   - Backend: Jest + Supertest
+- CI: GitHub Actions
 
 ## Estrutura do repositório
 
 - `frontend/` — aplicação React com Vite
 - `backend/` — API Node.js com Express
+- `.github/workflows/` — workflows de integração contínua
 - `.env.exemplo` — modelo de variáveis de ambiente
 - `README.md` — documentação do projeto
 
@@ -47,6 +49,16 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Middleware central de erro.
 - Testes automatizados com Jest + Supertest.
 
+### Integração contínua
+
+- Workflow de CI configurado em `.github/workflows/ci.yml`.
+- A pipeline roda automaticamente em Pull Requests para `main`.
+- A pipeline também roda em pushes para `main`.
+- O CI instala dependências com `npm ci`.
+- O CI executa testes do frontend.
+- O CI gera o build do frontend.
+- O CI executa testes do backend.
+
 ## Como rodar o projeto
 
 Pré-requisitos:
@@ -54,11 +66,30 @@ Pré-requisitos:
 - Node.js instalado, de preferência versão LTS.
 - MongoDB Atlas será usado nas próximas etapas do backend com banco real.
 
-### Rodar o frontend
+### Instalar dependências
+
+Na raiz do projeto:
+
+```bash
+npm install
+```
+
+Também é possível instalar por workspace:
 
 ```bash
 cd frontend
 npm install
+```
+
+```bash
+cd backend
+npm install
+```
+
+## Rodar o frontend
+
+```bash
+cd frontend
 npm run dev
 ```
 
@@ -71,11 +102,10 @@ Login mock:
 - Email: qualquer email, por exemplo `joao@email.com`
 - Senha: qualquer senha, por exemplo `123456`
 
-### Rodar o backend
+## Rodar o backend
 
 ```bash
 cd backend
-npm install
 npm run dev
 ```
 
@@ -111,10 +141,45 @@ cd backend
 npm test
 ```
 
+Rodar build do frontend:
+
+```bash
+cd frontend
+npm run build
+```
+
+## GitHub Actions
+
+A CI do projeto valida automaticamente os principais pontos antes de uma alteração entrar na `main`.
+
+Workflow:
+
+- Arquivo: `.github/workflows/ci.yml`
+- Eventos:
+  - Pull Request para `main`
+  - Push na `main`
+- Comandos executados:
+  - `npm ci`
+  - `npm --workspace frontend test -- --runInBand`
+  - `npm --workspace frontend run build`
+  - `npm --workspace backend test`
+
+Antes de abrir um Pull Request, recomenda-se rodar localmente:
+
+```bash
+cd frontend
+npm test
+npm run build
+```
+
+```bash
+cd backend
+npm test
+```
+
 ## Funcionalidades planejadas
 
 - Conexão com MongoDB Atlas usando variáveis de ambiente.
-- Pipeline de CI com GitHub Actions.
 - Autenticação real com cadastro, login, logout, JWT e senha criptografada.
 - CRUD real de receitas no backend.
 - Integração do frontend com a API.
@@ -127,13 +192,12 @@ npm test
 
 ## Roadmap incremental
 
-1. Finalizar o PR dos formulários principais e da biblioteca pessoal.
-2. Configurar CI com GitHub Actions.
-3. Configurar conexão com MongoDB Atlas.
-4. Implementar autenticação com JWT e testes.
-5. Implementar CRUD de receitas com regras de dono e testes.
-6. Integrar autenticação e receitas do frontend com a API.
-7. Implementar comentários, favoritos, lista de compras e histórico com backend real.
+1. Configurar conexão com MongoDB Atlas.
+2. Implementar autenticação com JWT e testes.
+3. Implementar CRUD de receitas com regras de dono e testes.
+4. Integrar autenticação e receitas do frontend com a API.
+5. Implementar comentários, favoritos, lista de compras e histórico com backend real.
+6. Preparar deploy do frontend e backend.
 
 ## Observações de regra de negócio
 
@@ -155,11 +219,14 @@ npm test
 
 O projeto está sendo desenvolvido com commits pequenos e organizados.
 
-Esta branch de formulários principais deve fechar as issues de formulários e regra de negócio quando o Pull Request for aberto ou atualizado com:
+Cada Pull Request deve informar as issues relacionadas usando:
 
 ```txt
-Closes #1
-Closes #2
+Closes #numero-da-issue
 ```
 
-Se os números das issues forem diferentes, substitua `#1` e `#2` pelos números corretos no PR.
+Para a issue de CI, use:
+
+```txt
+Closes #5
+```
