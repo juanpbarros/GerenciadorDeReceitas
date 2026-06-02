@@ -8,8 +8,13 @@ node_modules/
 # Variáveis locais e senhas
 .env
 .env.local
+.env.*
+!.env.example
 
 # Arquivos de log e sistema
 npm-debug.log*
 .DS_Store
+
+# Builds
 dist/
+frontend/dist/

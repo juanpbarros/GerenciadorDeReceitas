@@ -7,7 +7,7 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Frontend: React + Vite
 - UI: Bootstrap + CSS
 - Backend: Node.js + Express
-- Banco de dados: MongoDB com Mongoose
+- Banco de dados: MongoDB Atlas com Mongoose
 - Autenticação: JWT + bcrypt
 - Testes:
   - Frontend: Jest + React Testing Library
@@ -18,8 +18,9 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 
 - `frontend/` — aplicação React com Vite
 - `backend/` — API Node.js com Express
+- `backend/src/config/` — configurações do backend, incluindo conexão com banco
 - `.github/workflows/` — workflows de integração contínua
-- `.env.exemplo` — modelo de variáveis de ambiente
+- `.env.example` — modelo de variáveis de ambiente
 - `README.md` — documentação do projeto
 
 ## Status atual
@@ -33,17 +34,14 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Autenticação mock com `localStorage`, apenas para simular o fluxo visual antes da integração com o backend.
 - Listagem mock de receitas com busca e filtro por categoria.
 - Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
-- Exibição de autoria apenas para receitas adicionadas de outras pessoas, por exemplo: `Receita de Rafaela`.
-- Formulário de receita com ingredientes e modo de preparo em campos dinâmicos.
-- Formulário de lista de compras com itens dinâmicos e status comprado/não comprado.
-- Formulário de comentários e avaliações com nota de 1 a 5.
-- Formulário de histórico de receitas feitas com data, observação e nota pessoal opcional.
+- Formulários principais criados para receitas, lista de compras, comentários e histórico.
 - Testes automatizados para autenticação mock, listagem, filtros e formulários principais.
 
 ### Backend
 
 - API Express configurada.
-- Estrutura inicial em `src/` com controllers, routes, middlewares e tests.
+- Conexão com MongoDB Atlas preparada via `MONGODB_URI`.
+- Estrutura inicial em `src/` com config, controllers, routes, middlewares e tests.
 - Rota de saúde disponível em `GET /api/health`.
 - Middleware para rota não encontrada.
 - Middleware central de erro.
@@ -64,7 +62,8 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 Pré-requisitos:
 
 - Node.js instalado, de preferência versão LTS.
-- MongoDB Atlas será usado nas próximas etapas do backend com banco real.
+- Conta gratuita no MongoDB Atlas.
+- Cluster criado no MongoDB Atlas.
 
 ### Instalar dependências
 
@@ -74,17 +73,39 @@ Na raiz do projeto:
 npm install
 ```
 
-Também é possível instalar por workspace:
+## Configurar variáveis de ambiente
+
+Copie o arquivo de exemplo:
 
 ```bash
-cd frontend
-npm install
+copy .env.example .env
 ```
 
+No Linux/macOS:
+
 ```bash
-cd backend
-npm install
+cp .env.example .env
 ```
+
+Depois edite o `.env` com os valores reais:
+
+```env
+PORT=3000
+MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/gerenciador-receitas?retryWrites=true&w=majority
+JWT_SECRET=troque-por-uma-chave-secreta-forte
+```
+
+## Configurar MongoDB Atlas
+
+No MongoDB Atlas:
+
+- Crie um cluster gratuito.
+- Crie um usuário de banco com senha forte.
+- Libere seu IP em **Network Access**.
+- Copie a connection string do cluster.
+- Substitua `usuario`, `senha` e `cluster` no `.env`.
+
+Para desenvolvimento escolar, é comum liberar temporariamente `0.0.0.0/0` no Atlas, mas isso permite conexão de qualquer IP. Use apenas se necessário e com senha forte.
 
 ## Rodar o frontend
 
@@ -164,22 +185,8 @@ Workflow:
   - `npm --workspace frontend run build`
   - `npm --workspace backend test`
 
-Antes de abrir um Pull Request, recomenda-se rodar localmente:
-
-```bash
-cd frontend
-npm test
-npm run build
-```
-
-```bash
-cd backend
-npm test
-```
-
 ## Funcionalidades planejadas
 
-- Conexão com MongoDB Atlas usando variáveis de ambiente.
 - Autenticação real com cadastro, login, logout, JWT e senha criptografada.
 - CRUD real de receitas no backend.
 - Integração do frontend com a API.
@@ -192,12 +199,11 @@ npm test
 
 ## Roadmap incremental
 
-1. Configurar conexão com MongoDB Atlas.
-2. Implementar autenticação com JWT e testes.
-3. Implementar CRUD de receitas com regras de dono e testes.
-4. Integrar autenticação e receitas do frontend com a API.
-5. Implementar comentários, favoritos, lista de compras e histórico com backend real.
-6. Preparar deploy do frontend e backend.
+1. Implementar autenticação com JWT e testes.
+2. Implementar CRUD de receitas com regras de dono e testes.
+3. Integrar autenticação e receitas do frontend com a API.
+4. Implementar comentários, favoritos, lista de compras e histórico com backend real.
+5. Preparar deploy do frontend e backend.
 
 ## Observações de regra de negócio
 
@@ -212,8 +218,10 @@ npm test
 
 - O arquivo `.env` real não deve ser commitado.
 - Credenciais do MongoDB Atlas, `JWT_SECRET` e URLs de produção devem ficar apenas no ambiente local ou no serviço de deploy.
-- O repositório deve manter apenas exemplos seguros, como `.env.exemplo`.
+- O repositório deve manter apenas exemplos seguros, como `.env.example`.
 - Antes de qualquer commit envolvendo backend, banco ou deploy, conferir `git status` para evitar subir segredos.
+- Não use usuário administrador global do Atlas se não for necessário.
+- Use senha forte para o usuário do banco.
 
 ## Controle de versão
 
@@ -225,8 +233,8 @@ Cada Pull Request deve informar as issues relacionadas usando:
 Closes #numero-da-issue
 ```
 
-Para a issue de CI, use:
+Para a issue de MongoDB Atlas, use:
 
 ```txt
-Closes #5
+Closes #6
 ```
