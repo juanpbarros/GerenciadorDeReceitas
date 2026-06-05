@@ -35,6 +35,7 @@ describe('routing/auth', () => {
     setRoute('/')
     render(<App />)
     expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+    expect(getCurrentUserRequest).not.toHaveBeenCalled()
   })
 
   it('renders dashboard when authenticated', () => {
@@ -54,6 +55,7 @@ describe('routing/auth', () => {
     await user.click(screen.getByRole('button', { name: /sair/i }))
     expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
+    expect(localStorage.getItem('gr_auth_user')).toBeNull()
   })
 
   it('restores the authenticated user from a saved token', async () => {
@@ -102,6 +104,22 @@ describe('routing/auth', () => {
     expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
   })
 
+  it('shows an error and keeps session empty when login fails', async () => {
+    const user = userEvent.setup()
+    loginRequest.mockRejectedValue(new Error('Credenciais inválidas'))
+
+    setRoute('/login')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/email/i), 'maria@email.com')
+    await user.type(screen.getByLabelText(/senha/i), 'senha-errada')
+    await user.click(screen.getByRole('button', { name: /entrar/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível entrar/i)
+    expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
+    expect(localStorage.getItem('gr_auth_user')).toBeNull()
+  })
+
   it('registers using the backend auth API', async () => {
     const user = userEvent.setup()
     registerRequest.mockResolvedValue({
@@ -124,6 +142,23 @@ describe('routing/auth', () => {
     })
     expect(localStorage.getItem(TOKEN_KEY)).toBe('jwt-token-register')
     expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
+  })
+
+  it('shows an error and keeps session empty when registration fails', async () => {
+    const user = userEvent.setup()
+    registerRequest.mockRejectedValue(new Error('Email já cadastrado'))
+
+    setRoute('/register')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/nome/i), 'Rafaela')
+    await user.type(screen.getByLabelText(/email/i), 'rafaela@email.com')
+    await user.type(screen.getByLabelText(/senha/i), '123456')
+    await user.click(screen.getByRole('button', { name: /cadastrar/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível cadastrar/i)
+    expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
+    expect(localStorage.getItem('gr_auth_user')).toBeNull()
   })
 })
 
