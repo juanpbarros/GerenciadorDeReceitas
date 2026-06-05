@@ -1,6 +1,14 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
+import { loginRequest, registerRequest } from '../services/authApi'
+import { TOKEN_KEY } from '../services/tokenStorage'
+
+jest.mock('../services/authApi', () => ({
+  loginRequest: jest.fn(),
+  registerRequest: jest.fn(),
+  getCurrentUserRequest: jest.fn(),
+}))
 
 function setRoute(path) {
   window.history.pushState({}, '', path)
@@ -8,6 +16,7 @@ function setRoute(path) {
 
 describe('routing/auth', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     localStorage.clear()
   })
 
@@ -33,6 +42,49 @@ describe('routing/auth', () => {
 
     await user.click(screen.getByRole('button', { name: /sair/i }))
     expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+  })
+
+  it('logs in using the backend auth API', async () => {
+    const user = userEvent.setup()
+    loginRequest.mockResolvedValue({
+      user: { _id: '1', nome: 'Maria', email: 'maria@email.com' },
+      token: 'jwt-token-login',
+    })
+
+    setRoute('/login')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/email/i), 'maria@email.com')
+    await user.type(screen.getByLabelText(/senha/i), '123456')
+    await user.click(screen.getByRole('button', { name: /entrar/i }))
+
+    expect(loginRequest).toHaveBeenCalledWith({ email: 'maria@email.com', senha: '123456' })
+    expect(localStorage.getItem(TOKEN_KEY)).toBe('jwt-token-login')
+    expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
+  })
+
+  it('registers using the backend auth API', async () => {
+    const user = userEvent.setup()
+    registerRequest.mockResolvedValue({
+      user: { _id: '2', nome: 'Rafaela', email: 'rafaela@email.com' },
+      token: 'jwt-token-register',
+    })
+
+    setRoute('/register')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/nome/i), 'Rafaela')
+    await user.type(screen.getByLabelText(/email/i), 'rafaela@email.com')
+    await user.type(screen.getByLabelText(/senha/i), '123456')
+    await user.click(screen.getByRole('button', { name: /cadastrar/i }))
+
+    expect(registerRequest).toHaveBeenCalledWith({
+      nome: 'Rafaela',
+      email: 'rafaela@email.com',
+      senha: '123456',
+    })
+    expect(localStorage.getItem(TOKEN_KEY)).toBe('jwt-token-register')
+    expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
   })
 })
 
