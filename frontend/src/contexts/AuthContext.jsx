@@ -1,25 +1,27 @@
-import { createContext, useMemo, useState, useContext } from 'react'
+import { createContext, useEffect, useMemo, useState, useContext } from 'react'
+import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
+import { clearAuthToken, getAuthToken, setAuthToken } from '../services/tokenStorage'
 
 const AuthContext = createContext(null)
 const STORAGE_KEY = 'gr_auth_user'
 
-const DEFAULT_MOCK_USER = {
-  _id: 'mock-user-1',
-  nome: 'João Silva',
-  email: 'joao@email.com',
+function getStoredUser() {
+  const token = getAuthToken()
+  const raw = localStorage.getItem(STORAGE_KEY)
+
+  if (!token || !raw) return null
+
+  try {
+    return JSON.parse(raw)
+  } catch {
+    localStorage.removeItem(STORAGE_KEY)
+    return null
+  }
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    try {
-      return JSON.parse(raw)
-    } catch {
-      localStorage.removeItem(STORAGE_KEY)
-      return null
-    }
-  })
+  const [user, setUser] = useState(getStoredUser)
+  const [isLoading, setIsLoading] = useState(() => Boolean(getAuthToken() && !getStoredUser()))
 
   const persist = (nextUser) => {
     setUser(nextUser)
@@ -27,21 +29,55 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem(STORAGE_KEY)
   }
 
+  useEffect(() => {
+    const token = getAuthToken()
+    if (!token) {
+      persist(null)
+      setIsLoading(false)
+      return undefined
+    }
+
+    let isMounted = true
+
+    async function loadAuthenticatedUser() {
+      try {
+        const { user: authenticatedUser } = await getCurrentUserRequest()
+        if (isMounted) persist(authenticatedUser)
+      } catch {
+        if (isMounted) {
+          clearAuthToken()
+          persist(null)
+        }
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+
+    loadAuthenticatedUser()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const login = async (email, password) => {
-    void password
-    persist({ ...DEFAULT_MOCK_USER, email })
+    const { user: authenticatedUser, token } = await loginRequest({ email, senha: password })
+    setAuthToken(token)
+    persist(authenticatedUser)
   }
 
   const register = async (nome, email, password) => {
-    void password
-    persist({ _id: 'mock-user-1', nome, email })
+    const { user: registeredUser, token } = await registerRequest({ nome, email, senha: password })
+    setAuthToken(token)
+    persist(registeredUser)
   }
 
   const logout = () => {
+    clearAuthToken()
     persist(null)
   }
 
-  const value = useMemo(() => ({ user, login, register, logout }), [user])
+  const value = useMemo(() => ({ user, isLoading, login, register, logout }), [user, isLoading])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
