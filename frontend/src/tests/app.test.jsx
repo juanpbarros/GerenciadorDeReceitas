@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
-import { loginRequest, registerRequest } from '../services/authApi'
+import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
 import { TOKEN_KEY } from '../services/tokenStorage'
 
 jest.mock('../services/authApi', () => ({
@@ -14,9 +14,20 @@ function setRoute(path) {
   window.history.pushState({}, '', path)
 }
 
+const AUTH_USER = { _id: '1', nome: 'Maria', email: 'maria@email.com' }
+
+function authenticate(user = AUTH_USER, token = 'jwt-token') {
+  localStorage.setItem(TOKEN_KEY, token)
+  localStorage.setItem('gr_auth_user', JSON.stringify(user))
+}
+
+beforeEach(() => {
+  jest.clearAllMocks()
+  getCurrentUserRequest.mockResolvedValue({ user: AUTH_USER })
+})
+
 describe('routing/auth', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
     localStorage.clear()
   })
 
@@ -27,7 +38,7 @@ describe('routing/auth', () => {
   })
 
   it('renders dashboard when authenticated', () => {
-    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+    authenticate()
     setRoute('/')
     render(<App />)
     expect(screen.getByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
@@ -36,12 +47,40 @@ describe('routing/auth', () => {
 
   it('logout returns to /login', async () => {
     const user = userEvent.setup()
-    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+    authenticate()
     setRoute('/')
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: /sair/i }))
     expect(screen.getByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+    expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
+  })
+
+  it('restores the authenticated user from a saved token', async () => {
+    localStorage.setItem(TOKEN_KEY, 'stored-token')
+    getCurrentUserRequest.mockResolvedValue({
+      user: { _id: '3', nome: 'João', email: 'joao@email.com' },
+    })
+
+    setRoute('/')
+    render(<App />)
+
+    expect(screen.getByLabelText(/carregando sessão/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
+    expect(getCurrentUserRequest).toHaveBeenCalled()
+    expect(localStorage.getItem('gr_auth_user')).toContain('joao@email.com')
+  })
+
+  it('clears an invalid saved token and redirects to login', async () => {
+    localStorage.setItem(TOKEN_KEY, 'invalid-token')
+    getCurrentUserRequest.mockRejectedValue(new Error('Token inválido'))
+
+    setRoute('/')
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: /entrar/i })).toBeInTheDocument()
+    expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
+    expect(localStorage.getItem('gr_auth_user')).toBeNull()
   })
 
   it('logs in using the backend auth API', async () => {
@@ -91,7 +130,7 @@ describe('routing/auth', () => {
 describe('recipes listing', () => {
   beforeEach(() => {
     localStorage.clear()
-    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+    authenticate()
   })
 
   it('renders recipe cards from mock data', () => {
@@ -140,7 +179,7 @@ describe('recipes listing', () => {
 describe('recipe form', () => {
   beforeEach(() => {
     localStorage.clear()
-    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+    authenticate()
   })
 
   it('adds dynamic ingredient and preparation step fields', async () => {
@@ -189,7 +228,7 @@ describe('recipe form', () => {
 describe('shopping list form', () => {
   beforeEach(() => {
     localStorage.clear()
-    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+    authenticate()
   })
 
   it('adds dynamic shopping list items and marks an item as purchased', async () => {
@@ -235,7 +274,7 @@ describe('shopping list form', () => {
 describe('comment form', () => {
   beforeEach(() => {
     localStorage.clear()
-    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+    authenticate()
   })
 
   it('shows validation message when comment form is incomplete', async () => {
@@ -264,7 +303,7 @@ describe('comment form', () => {
 describe('history form', () => {
   beforeEach(() => {
     localStorage.clear()
-    localStorage.setItem('gr_auth_user', JSON.stringify({ _id: '1', nome: 'Maria', email: 'maria@email.com' }))
+    authenticate()
   })
 
   it('shows validation message when history form is incomplete', async () => {
