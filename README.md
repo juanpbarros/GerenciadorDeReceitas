@@ -8,7 +8,7 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - UI: Bootstrap + CSS
 - Backend: Node.js + Express
 - Banco de dados: MongoDB Atlas com Mongoose
-- Autenticação: JWT + bcrypt
+- Autenticação: JWT + Argon2
 - Testes:
   - Frontend: Jest + React Testing Library
   - Backend: Jest + Supertest
@@ -19,6 +19,11 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - `frontend/` — aplicação React com Vite
 - `backend/` — API Node.js com Express
 - `backend/src/config/` — configurações do backend, incluindo conexão com banco
+- `backend/src/controllers/` — controllers da API
+- `backend/src/middlewares/` — middlewares de erro e autenticação
+- `backend/src/models/` — models do Mongoose
+- `backend/src/routes/` — rotas da API
+- `backend/src/services/` — serviços auxiliares, como autenticação
 - `.github/workflows/` — workflows de integração contínua
 - `.env.example` — modelo de variáveis de ambiente
 - `README.md` — documentação do projeto
@@ -31,7 +36,7 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Sidebar conectada ao canto da tela, usando Bootstrap + CSS.
 - Rotas públicas para login e cadastro.
 - Rotas protegidas para dashboard, receitas, favoritos, lista de compras, histórico e perfil.
-- Autenticação mock com `localStorage`, apenas para simular o fluxo visual antes da integração com o backend.
+- Autenticação mock com `localStorage`, enquanto a integração real com a API ainda não foi feita.
 - Listagem mock de receitas com busca e filtro por categoria.
 - Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
 - Formulários principais criados para receitas, lista de compras, comentários e histórico.
@@ -40,9 +45,11 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 ### Backend
 
 - API Express configurada.
-- Conexão com MongoDB Atlas preparada via `MONGODB_URI`.
-- Estrutura inicial em `src/` com config, controllers, routes, middlewares e tests.
+- Conexão com MongoDB Atlas via `MONGODB_URI`.
+- Autenticação com cadastro, login, JWT e middleware de rota protegida.
+- Senhas armazenadas com hash usando Argon2.
 - Rota de saúde disponível em `GET /api/health`.
+- Rotas de autenticação disponíveis em `/api/auth`.
 - Middleware para rota não encontrada.
 - Middleware central de erro.
 - Testes automatizados com Jest + Supertest.
@@ -146,6 +153,34 @@ Resposta esperada:
 }
 ```
 
+## Rotas da API
+
+### Saúde
+
+- `GET /api/health` — verifica se a API está respondendo.
+
+### Autenticação
+
+- `POST /api/auth/register` — cadastra usuário.
+- `POST /api/auth/login` — autentica usuário e retorna JWT.
+- `GET /api/auth/me` — retorna usuário logado, exigindo token Bearer.
+
+Exemplo de cadastro:
+
+```json
+{
+  "nome": "Maria",
+  "email": "maria@email.com",
+  "senha": "123456"
+}
+```
+
+Exemplo de uso do token:
+
+```txt
+Authorization: Bearer seu_token_jwt
+```
+
 ## Testes automatizados
 
 Rodar testes do frontend:
@@ -187,7 +222,7 @@ Workflow:
 
 ## Funcionalidades planejadas
 
-- Autenticação real com cadastro, login, logout, JWT e senha criptografada.
+- Integração da autenticação real com o frontend.
 - CRUD real de receitas no backend.
 - Integração do frontend com a API.
 - Favoritos individuais por usuário.
@@ -199,9 +234,9 @@ Workflow:
 
 ## Roadmap incremental
 
-1. Implementar autenticação com JWT e testes.
+1. Integrar autenticação real do frontend com a API.
 2. Implementar CRUD de receitas com regras de dono e testes.
-3. Integrar autenticação e receitas do frontend com a API.
+3. Integrar receitas do frontend com a API.
 4. Implementar comentários, favoritos, lista de compras e histórico com backend real.
 5. Preparar deploy do frontend e backend.
 
@@ -222,6 +257,8 @@ Workflow:
 - Antes de qualquer commit envolvendo backend, banco ou deploy, conferir `git status` para evitar subir segredos.
 - Não use usuário administrador global do Atlas se não for necessário.
 - Use senha forte para o usuário do banco.
+- Senhas de usuários da aplicação são salvas apenas como hash.
+- A API não retorna `passwordHash` nas respostas.
 
 ## Controle de versão
 
@@ -233,8 +270,8 @@ Cada Pull Request deve informar as issues relacionadas usando:
 Closes #numero-da-issue
 ```
 
-Para a issue de MongoDB Atlas, use:
+Para a issue de autenticação backend, use:
 
 ```txt
-Closes #6
+Closes #12
 ```
