@@ -36,11 +36,15 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Sidebar conectada ao canto da tela, usando Bootstrap + CSS.
 - Rotas públicas para login e cadastro.
 - Rotas protegidas para dashboard, receitas, favoritos, lista de compras, histórico e perfil.
-- Autenticação mock com `localStorage`, enquanto a integração real com a API ainda não foi feita.
+- Autenticação real integrada com a API do backend.
+- Login e cadastro consomem `/api/auth/login` e `/api/auth/register`.
+- Token JWT salvo no navegador e enviado automaticamente nas requisições autenticadas.
+- Sessão restaurada via `/api/auth/me` quando existe token salvo.
+- Logout remove token e usuário do navegador.
 - Listagem mock de receitas com busca e filtro por categoria.
 - Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
 - Formulários principais criados para receitas, lista de compras, comentários e histórico.
-- Testes automatizados para autenticação mock, listagem, filtros e formulários principais.
+- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros e formulários principais.
 
 ### Backend
 
@@ -102,6 +106,14 @@ MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/gerenciador-receitas
 JWT_SECRET=troque-por-uma-chave-secreta-forte
 ```
 
+Para o frontend, o arquivo `frontend/.env.example` define:
+
+```env
+VITE_API_URL=/api
+```
+
+Em desenvolvimento, esse valor usa o proxy do Vite para encaminhar chamadas `/api` para `http://localhost:3000`.
+
 ## Configurar MongoDB Atlas
 
 No MongoDB Atlas:
@@ -125,10 +137,16 @@ Acesse:
 
 - `http://localhost:5173`
 
-Login mock:
+Para usar login e cadastro reais pelo frontend, mantenha o backend rodando ao mesmo tempo.
 
-- Email: qualquer email, por exemplo `joao@email.com`
-- Senha: qualquer senha, por exemplo `123456`
+Fluxo sugerido:
+
+- Inicie o backend em `http://localhost:3000`.
+- Inicie o frontend em `http://localhost:5173`.
+- Acesse `/register` para criar uma conta real.
+- Use essa conta em `/login`.
+- Recarregue a página para validar a restauração da sessão via token.
+- Clique em logout para remover token e usuário salvos.
 
 ## Rodar o backend
 
@@ -222,7 +240,6 @@ Workflow:
 
 ## Funcionalidades planejadas
 
-- Integração da autenticação real com o frontend.
 - CRUD real de receitas no backend.
 - Integração do frontend com a API.
 - Favoritos individuais por usuário.
@@ -234,11 +251,12 @@ Workflow:
 
 ## Roadmap incremental
 
-1. Integrar autenticação real do frontend com a API.
+1. Criar models base de receitas e comentários.
 2. Implementar CRUD de receitas com regras de dono e testes.
-3. Integrar receitas do frontend com a API.
-4. Implementar comentários, favoritos, lista de compras e histórico com backend real.
-5. Preparar deploy do frontend e backend.
+3. Implementar CRUD de comentários com regras de autor e testes.
+4. Integrar receitas e comentários do frontend com a API.
+5. Implementar favoritos, lista de compras e histórico com backend real.
+6. Preparar deploy do frontend e backend.
 
 ## Observações de regra de negócio
 
@@ -274,4 +292,10 @@ Para a issue de autenticação backend, use:
 
 ```txt
 Closes #12
+```
+
+Para a issue de integração da autenticação do frontend com o backend, use:
+
+```txt
+Closes #13
 ```
