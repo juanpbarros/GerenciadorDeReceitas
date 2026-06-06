@@ -52,11 +52,14 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Conexão com MongoDB Atlas via `MONGODB_URI`.
 - Autenticação com cadastro, login, JWT e middleware de rota protegida.
 - Senhas armazenadas com hash usando Argon2.
+- Model base de receitas criado com ingredientes e modo de preparo como listas de strings.
+- Model base de comentários criado com relação para usuário e receita.
+- Categorias de receitas definidas por enum no backend.
 - Rota de saúde disponível em `GET /api/health`.
 - Rotas de autenticação disponíveis em `/api/auth`.
 - Middleware para rota não encontrada.
 - Middleware central de erro.
-- Testes automatizados com Jest + Supertest.
+- Testes automatizados com Jest + Supertest, incluindo validações dos models base.
 
 ### Integração contínua
 
@@ -251,12 +254,11 @@ Workflow:
 
 ## Roadmap incremental
 
-1. Criar models base de receitas e comentários.
-2. Implementar CRUD de receitas com regras de dono e testes.
-3. Implementar CRUD de comentários com regras de autor e testes.
-4. Integrar receitas e comentários do frontend com a API.
-5. Implementar favoritos, lista de compras e histórico com backend real.
-6. Preparar deploy do frontend e backend.
+1. Implementar CRUD de receitas com regras de dono e testes.
+2. Implementar CRUD de comentários com regras de autor e testes.
+3. Integrar receitas e comentários do frontend com a API.
+4. Implementar favoritos, lista de compras e histórico com backend real.
+5. Preparar deploy do frontend e backend.
 
 ## Observações de regra de negócio
 
