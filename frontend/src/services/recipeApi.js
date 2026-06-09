@@ -1,0 +1,31 @@
+import { apiClient } from './apiClient'
+
+export function normalizeRecipe(recipe) {
+  return {
+    id: recipe._id,
+    title: recipe.titulo,
+    description: recipe.descricao,
+    ingredients: recipe.ingredientes || [],
+    preparationSteps: recipe.modoPreparo || [],
+    prepTimeMinutes: recipe.tempoPreparo,
+    category: recipe.categoria,
+    imageUrl: recipe.imagemUrl || '',
+    creator: recipe.usuarioCriador || null,
+    origin: 'own',
+    sourceName: null,
+    rating: recipe.rating || 0,
+  }
+}
+
+export async function listRecipesRequest({ busca = '', categoria = '' } = {}) {
+  const response = await apiClient.get('/recipes', {
+    params: {
+      ...(busca ? { busca } : {}),
+      ...(categoria ? { categoria } : {}),
+    },
+  })
+
+  return {
+    recipes: response.data.recipes.map(normalizeRecipe),
+  }
+}

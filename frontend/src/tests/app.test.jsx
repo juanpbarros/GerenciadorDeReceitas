@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
+import { listRecipesRequest } from '../services/recipeApi'
 import { TOKEN_KEY } from '../services/tokenStorage'
 
 jest.mock('../services/authApi', () => ({
@@ -10,11 +11,42 @@ jest.mock('../services/authApi', () => ({
   getCurrentUserRequest: jest.fn(),
 }))
 
+jest.mock('../services/recipeApi', () => ({
+  listRecipesRequest: jest.fn(),
+}))
+
 function setRoute(path) {
   window.history.pushState({}, '', path)
 }
 
 const AUTH_USER = { _id: '1', nome: 'Maria', email: 'maria@email.com' }
+
+const API_RECIPES = [
+  {
+    id: 'bolo-cenoura',
+    title: 'Bolo de cenoura',
+    description: 'Bolo caseiro fofinho.',
+    ingredients: ['2 cenouras', '2 ovos'],
+    preparationSteps: ['Bata tudo', 'Leve ao forno'],
+    prepTimeMinutes: 45,
+    category: 'Sobremesa',
+    origin: 'own',
+    sourceName: null,
+    rating: 0,
+  },
+  {
+    id: 'macarrao-alho-oleo',
+    title: 'Macarrão alho e óleo',
+    description: 'Receita rápida.',
+    ingredients: ['250g de macarrão', '3 dentes de alho'],
+    preparationSteps: ['Cozinhe o macarrão', 'Doure o alho'],
+    prepTimeMinutes: 20,
+    category: 'Massas',
+    origin: 'own',
+    sourceName: null,
+    rating: 0,
+  },
+]
 
 function authenticate(user = AUTH_USER, token = 'jwt-token') {
   localStorage.setItem(TOKEN_KEY, token)
@@ -24,6 +56,7 @@ function authenticate(user = AUTH_USER, token = 'jwt-token') {
 beforeEach(() => {
   jest.clearAllMocks()
   getCurrentUserRequest.mockResolvedValue({ user: AUTH_USER })
+  listRecipesRequest.mockResolvedValue({ recipes: API_RECIPES })
 })
 
 describe('routing/auth', () => {
@@ -168,46 +201,47 @@ describe('recipes listing', () => {
     authenticate()
   })
 
-  it('renders recipe cards from mock data', () => {
+  it('renders recipe cards from the API', async () => {
     setRoute('/receitas')
     render(<App />)
 
     expect(screen.getByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Bolo de cenoura/i })).toBeInTheDocument()
+    expect(screen.getByLabelText(/carregando receitas/i)).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /Bolo de cenoura/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Macarrão alho e óleo/i })).toBeInTheDocument()
-    expect(screen.getByText(/6 receitas encontradas/i)).toBeInTheDocument()
+    expect(screen.getByText(/2 receitas encontradas/i)).toBeInTheDocument()
+    expect(listRecipesRequest).toHaveBeenCalledWith({ busca: '', categoria: '' })
   })
 
-  it('shows source only for recipes added from another person', () => {
+  it('shows an error when recipes cannot be loaded', async () => {
+    listRecipesRequest.mockRejectedValue(new Error('Falha na API'))
+
     setRoute('/receitas')
     render(<App />)
 
-    expect(screen.queryByText(/Receita de Maria/i)).not.toBeInTheDocument()
-    expect(screen.getByText(/Receita de Rafaela/i)).toBeInTheDocument()
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar as receitas/i)
   })
 
-  it('filters recipes by search text', async () => {
+  it('searches recipes using the API', async () => {
     const user = userEvent.setup()
     setRoute('/receitas')
     render(<App />)
 
+    await screen.findByRole('link', { name: /Bolo de cenoura/i })
     await user.type(screen.getByRole('textbox', { name: /buscar receitas/i }), 'omelete')
 
-    expect(screen.getByRole('link', { name: /Omelete simples/i })).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /Bolo de cenoura/i })).not.toBeInTheDocument()
-    expect(screen.getByText(/1 receita encontrada/i)).toBeInTheDocument()
+    expect(listRecipesRequest).toHaveBeenLastCalledWith({ busca: 'omelete', categoria: '' })
   })
 
-  it('filters recipes by category', async () => {
+  it('filters recipes by category using the API', async () => {
     const user = userEvent.setup()
     setRoute('/receitas')
     render(<App />)
 
-    await user.selectOptions(screen.getByRole('combobox', { name: /filtrar por categoria/i }), 'Bebidas')
+    await screen.findByRole('link', { name: /Bolo de cenoura/i })
+    await user.selectOptions(screen.getByRole('combobox', { name: /filtrar por categoria/i }), 'Massas')
 
-    expect(screen.getByRole('link', { name: /Suco de abacaxi com hortelã/i })).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /Tapioca com queijo/i })).not.toBeInTheDocument()
-    expect(screen.getByText(/1 receita encontrada/i)).toBeInTheDocument()
+    expect(listRecipesRequest).toHaveBeenLastCalledWith({ busca: '', categoria: 'Massas' })
   })
 })
 

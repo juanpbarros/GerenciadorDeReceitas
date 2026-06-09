@@ -1,26 +1,44 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import FilterBar from '../components/FilterBar'
 import RecipeCard from '../components/RecipeCard'
 import SearchBar from '../components/SearchBar'
-import { MOCK_RECIPES, RECIPE_CATEGORIES } from '../data/mockRecipes'
+import { RECIPE_CATEGORIES } from '../data/mockRecipes'
+import { listRecipesRequest } from '../services/recipeApi'
 
 export default function Recipes() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
+  const [recipes, setRecipes] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const filteredRecipes = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase()
+  useEffect(() => {
+    let isMounted = true
 
-    return MOCK_RECIPES.filter((recipe) => {
-      const matchesSearch = !normalizedSearch
-        || recipe.title.toLowerCase().includes(normalizedSearch)
-        || recipe.description.toLowerCase().includes(normalizedSearch)
+    async function loadRecipes() {
+      setIsLoading(true)
+      setError('')
 
-      const matchesCategory = !category || recipe.category === category
+      try {
+        const { recipes: apiRecipes } = await listRecipesRequest({
+          busca: search.trim(),
+          categoria: category,
+        })
 
-      return matchesSearch && matchesCategory
-    })
+        if (isMounted) setRecipes(apiRecipes)
+      } catch {
+        if (isMounted) setError('Não foi possível carregar as receitas.')
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+
+    loadRecipes()
+
+    return () => {
+      isMounted = false
+    }
   }, [category, search])
 
   return (
@@ -48,19 +66,32 @@ export default function Recipes() {
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <span className="text-secondary small">
-          {filteredRecipes.length} receita{filteredRecipes.length === 1 ? '' : 's'} encontrada{filteredRecipes.length === 1 ? '' : 's'}
+          {recipes.length} receita{recipes.length === 1 ? '' : 's'} encontrada{recipes.length === 1 ? '' : 's'}
         </span>
       </div>
 
-      {filteredRecipes.length > 0 ? (
+      {isLoading && (
+        <div className="empty-state border rounded-3 bg-light p-4 text-center">
+          <div className="spinner-border text-dark" role="status" aria-label="Carregando receitas" />
+          <p className="text-secondary mt-3 mb-0">Carregando receitas...</p>
+        </div>
+      )}
+
+      {error && !isLoading && (
+        <div role="alert" className="alert alert-danger">
+          {error}
+        </div>
+      )}
+
+      {!isLoading && !error && recipes.length > 0 ? (
         <div className="row g-3" aria-label="Lista de receitas">
-          {filteredRecipes.map((recipe) => (
+          {recipes.map((recipe) => (
             <div className="col-12 col-md-6 col-xl-4" key={recipe.id}>
               <RecipeCard recipe={recipe} />
             </div>
           ))}
         </div>
-      ) : (
+      ) : !isLoading && !error && (
         <div className="empty-state border rounded-3 bg-light p-4 text-center">
           <h3 className="h6 mb-1">Nenhuma receita encontrada</h3>
           <p className="text-secondary mb-0">Tente limpar a busca ou escolher outra categoria.</p>
