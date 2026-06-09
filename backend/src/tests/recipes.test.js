@@ -5,6 +5,7 @@ import { jest } from '@jest/globals'
 const userFindById = jest.fn()
 const recipeCreate = jest.fn()
 const recipeFind = jest.fn()
+const recipeFindById = jest.fn()
 
 jest.unstable_mockModule('../models/User.js', () => ({
   default: {
@@ -16,6 +17,7 @@ jest.unstable_mockModule('../models/Recipe.js', () => ({
   default: {
     create: recipeCreate,
     find: recipeFind,
+    findById: recipeFindById,
   },
 }))
 
@@ -42,6 +44,17 @@ function makeRecipe(overrides = {}) {
     categoria: 'Sobremesa',
     imagemUrl: '',
     usuarioCriador: authUser._id,
+    ...overrides,
+  }
+}
+
+function makeRecipeDocument(overrides = {}) {
+  return {
+    ...makeRecipe(),
+    save: jest.fn().mockImplementation(function save() {
+      return Promise.resolve(this)
+    }),
+    deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
     ...overrides,
   }
 }
@@ -135,5 +148,95 @@ describe('recipe routes', () => {
         { descricao: { $regex: 'bolo', $options: 'i' } },
       ],
     })
+  })
+
+  it('gets a recipe by id with creator data', async () => {
+    const recipe = makeRecipe()
+    const populate = jest.fn().mockResolvedValue(recipe)
+    recipeFindById.mockReturnValue({ populate })
+
+    const response = await request(app)
+      .get(`/api/recipes/${recipe._id}`)
+      .set('Authorization', `Bearer ${makeToken()}`)
+
+    expect(response.status).toBe(200)
+    expect(response.body.recipe).toEqual(recipe)
+    expect(recipeFindById).toHaveBeenCalledWith(recipe._id)
+    expect(populate).toHaveBeenCalledWith('usuarioCriador', 'nome email')
+  })
+
+  it('returns 404 when recipe is not found by id', async () => {
+    recipeFindById.mockReturnValue({
+      populate: jest.fn().mockResolvedValue(null),
+    })
+
+    const response = await request(app)
+      .get('/api/recipes/507f1f77bcf86cd799439099')
+      .set('Authorization', `Bearer ${makeToken()}`)
+
+    expect(response.status).toBe(404)
+    expect(response.body.message).toMatch(/receita não encontrada/i)
+  })
+
+  it('updates a recipe when the authenticated user is the owner', async () => {
+    const recipe = makeRecipeDocument()
+    recipeFindById.mockResolvedValue(recipe)
+
+    const response = await request(app)
+      .patch(`/api/recipes/${recipe._id}`)
+      .set('Authorization', `Bearer ${makeToken()}`)
+      .send({
+        titulo: 'Bolo de cenoura atualizado',
+        tempoPreparo: 50,
+      })
+
+    expect(response.status).toBe(200)
+    expect(recipe.titulo).toBe('Bolo de cenoura atualizado')
+    expect(recipe.tempoPreparo).toBe(50)
+    expect(recipe.save).toHaveBeenCalledTimes(1)
+    expect(response.body.recipe.titulo).toBe('Bolo de cenoura atualizado')
+  })
+
+  it('does not update a recipe from another user', async () => {
+    const recipe = makeRecipeDocument({
+      usuarioCriador: '507f1f77bcf86cd799439088',
+    })
+    recipeFindById.mockResolvedValue(recipe)
+
+    const response = await request(app)
+      .patch(`/api/recipes/${recipe._id}`)
+      .set('Authorization', `Bearer ${makeToken()}`)
+      .send({ titulo: 'Tentativa indevida' })
+
+    expect(response.status).toBe(403)
+    expect(response.body.message).toMatch(/apenas o dono/i)
+    expect(recipe.save).not.toHaveBeenCalled()
+  })
+
+  it('deletes a recipe when the authenticated user is the owner', async () => {
+    const recipe = makeRecipeDocument()
+    recipeFindById.mockResolvedValue(recipe)
+
+    const response = await request(app)
+      .delete(`/api/recipes/${recipe._id}`)
+      .set('Authorization', `Bearer ${makeToken()}`)
+
+    expect(response.status).toBe(204)
+    expect(recipe.deleteOne).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not delete a recipe from another user', async () => {
+    const recipe = makeRecipeDocument({
+      usuarioCriador: '507f1f77bcf86cd799439088',
+    })
+    recipeFindById.mockResolvedValue(recipe)
+
+    const response = await request(app)
+      .delete(`/api/recipes/${recipe._id}`)
+      .set('Authorization', `Bearer ${makeToken()}`)
+
+    expect(response.status).toBe(403)
+    expect(response.body.message).toMatch(/apenas o dono/i)
+    expect(recipe.deleteOne).not.toHaveBeenCalled()
   })
 })
