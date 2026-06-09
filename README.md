@@ -57,9 +57,10 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Categorias de receitas definidas por enum no backend.
 - Rota de saúde disponível em `GET /api/health`.
 - Rotas de autenticação disponíveis em `/api/auth`.
+- CRUD de comentários disponível em `/api/comments`.
 - Middleware para rota não encontrada.
 - Middleware central de erro.
-- Testes automatizados com Jest + Supertest, incluindo validações dos models base.
+- Testes automatizados com Jest + Supertest, incluindo validações dos models base e rotas de comentários.
 
 ### Integração contínua
 
@@ -186,6 +187,25 @@ Resposta esperada:
 - `POST /api/auth/login` — autentica usuário e retorna JWT.
 - `GET /api/auth/me` — retorna usuário logado, exigindo token Bearer.
 
+### Comentários
+
+- `GET /api/comments` — lista comentários.
+- `GET /api/comments?receita=idDaReceita` — lista comentários de uma receita.
+- `GET /api/comments/:id` — busca um comentário.
+- `POST /api/comments` — cria comentário, exigindo token Bearer.
+- `PUT /api/comments/:id` — edita comentário do autor logado, exigindo token Bearer.
+- `DELETE /api/comments/:id` — remove comentário do autor logado, exigindo token Bearer.
+
+Exemplo de comentário:
+
+```json
+{
+  "receita": "idDaReceita",
+  "texto": "Ficou muito bom.",
+  "nota": 5
+}
+```
+
 Exemplo de cadastro:
 
 ```json
@@ -255,10 +275,9 @@ Workflow:
 ## Roadmap incremental
 
 1. Implementar CRUD de receitas com regras de dono e testes.
-2. Implementar CRUD de comentários com regras de autor e testes.
-3. Integrar receitas e comentários do frontend com a API.
-4. Implementar favoritos, lista de compras e histórico com backend real.
-5. Preparar deploy do frontend e backend.
+2. Integrar receitas e comentários do frontend com a API.
+3. Implementar favoritos, lista de compras e histórico com backend real.
+4. Preparar deploy do frontend e backend.
 
 ## Observações de regra de negócio
 
