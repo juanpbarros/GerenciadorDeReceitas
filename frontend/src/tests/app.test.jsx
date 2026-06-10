@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react'
+﻿import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
+import { listCommentsRequest } from '../services/commentApi'
 import {
   createRecipeRequest,
   deleteRecipeRequest,
@@ -17,6 +18,10 @@ jest.mock('../services/authApi', () => ({
   getCurrentUserRequest: jest.fn(),
 }))
 
+jest.mock('../services/commentApi', () => ({
+  listCommentsRequest: jest.fn(),
+}))
+
 jest.mock('../services/recipeApi', () => ({
   createRecipeRequest: jest.fn(),
   deleteRecipeRequest: jest.fn(),
@@ -30,6 +35,16 @@ function setRoute(path) {
 }
 
 const AUTH_USER = { _id: '1', nome: 'Maria', email: 'maria@email.com' }
+const API_COMMENTS = [
+  {
+    id: 'comment-1',
+    recipeId: 'bolo-cenoura',
+    userId: '2',
+    userName: 'Rafaela',
+    text: 'Ficou perfeito para o cafÃ©.',
+    rating: 5,
+  },
+]
 
 const API_RECIPES = [
   {
@@ -46,10 +61,10 @@ const API_RECIPES = [
   },
   {
     id: 'macarrao-alho-oleo',
-    title: 'Macarrão alho e óleo',
-    description: 'Receita rápida.',
-    ingredients: ['250g de macarrão', '3 dentes de alho'],
-    preparationSteps: ['Cozinhe o macarrão', 'Doure o alho'],
+    title: 'MacarrÃ£o alho e Ã³leo',
+    description: 'Receita rÃ¡pida.',
+    ingredients: ['250g de macarrÃ£o', '3 dentes de alho'],
+    preparationSteps: ['Cozinhe o macarrÃ£o', 'Doure o alho'],
     prepTimeMinutes: 20,
     category: 'Massas',
     origin: 'own',
@@ -66,6 +81,7 @@ function authenticate(user = AUTH_USER, token = 'jwt-token') {
 beforeEach(() => {
   jest.clearAllMocks()
   getCurrentUserRequest.mockResolvedValue({ user: AUTH_USER })
+  listCommentsRequest.mockResolvedValue({ comments: API_COMMENTS })
   createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   deleteRecipeRequest.mockResolvedValue()
   getRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
@@ -108,13 +124,13 @@ describe('routing/auth', () => {
   it('restores the authenticated user from a saved token', async () => {
     localStorage.setItem(TOKEN_KEY, 'stored-token')
     getCurrentUserRequest.mockResolvedValue({
-      user: { _id: '3', nome: 'João', email: 'joao@email.com' },
+      user: { _id: '3', nome: 'JoÃ£o', email: 'joao@email.com' },
     })
 
     setRoute('/')
     render(<App />)
 
-    expect(screen.getByLabelText(/carregando sessão/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/carregando sessÃ£o/i)).toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: /dashboard/i })).toBeInTheDocument()
     expect(getCurrentUserRequest).toHaveBeenCalled()
     expect(localStorage.getItem('gr_auth_user')).toContain('joao@email.com')
@@ -122,7 +138,7 @@ describe('routing/auth', () => {
 
   it('clears an invalid saved token and redirects to login', async () => {
     localStorage.setItem(TOKEN_KEY, 'invalid-token')
-    getCurrentUserRequest.mockRejectedValue(new Error('Token inválido'))
+    getCurrentUserRequest.mockRejectedValue(new Error('Token invÃ¡lido'))
 
     setRoute('/')
     render(<App />)
@@ -153,7 +169,7 @@ describe('routing/auth', () => {
 
   it('shows an error and keeps session empty when login fails', async () => {
     const user = userEvent.setup()
-    loginRequest.mockRejectedValue(new Error('Credenciais inválidas'))
+    loginRequest.mockRejectedValue(new Error('Credenciais invÃ¡lidas'))
 
     setRoute('/login')
     render(<App />)
@@ -162,7 +178,7 @@ describe('routing/auth', () => {
     await user.type(screen.getByLabelText(/senha/i), 'senha-errada')
     await user.click(screen.getByRole('button', { name: /entrar/i }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível entrar/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/nÃ£o foi possÃ­vel entrar/i)
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
     expect(localStorage.getItem('gr_auth_user')).toBeNull()
   })
@@ -193,7 +209,7 @@ describe('routing/auth', () => {
 
   it('shows an error and keeps session empty when registration fails', async () => {
     const user = userEvent.setup()
-    registerRequest.mockRejectedValue(new Error('Email já cadastrado'))
+    registerRequest.mockRejectedValue(new Error('Email jÃ¡ cadastrado'))
 
     setRoute('/register')
     render(<App />)
@@ -203,7 +219,7 @@ describe('routing/auth', () => {
     await user.type(screen.getByLabelText(/senha/i), '123456')
     await user.click(screen.getByRole('button', { name: /cadastrar/i }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível cadastrar/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/nÃ£o foi possÃ­vel cadastrar/i)
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
     expect(localStorage.getItem('gr_auth_user')).toBeNull()
   })
@@ -222,7 +238,7 @@ describe('recipes listing', () => {
     expect(screen.getByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
     expect(screen.getByLabelText(/carregando receitas/i)).toBeInTheDocument()
     expect(await screen.findByRole('link', { name: /Bolo de cenoura/i })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Macarrão alho e óleo/i })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /MacarrÃ£o alho e Ã³leo/i })).toBeInTheDocument()
     expect(screen.getByText(/2 receitas encontradas/i)).toBeInTheDocument()
     expect(listRecipesRequest).toHaveBeenCalledWith({ busca: '', categoria: '' })
   })
@@ -233,7 +249,7 @@ describe('recipes listing', () => {
     setRoute('/receitas')
     render(<App />)
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar as receitas/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/nÃ£o foi possÃ­vel carregar as receitas/i)
   })
 
   it('searches recipes using the API', async () => {
@@ -281,7 +297,7 @@ describe('recipe details', () => {
     setRoute('/receitas/bolo-cenoura')
     render(<App />)
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar a receita/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/nÃ£o foi possÃ­vel carregar a receita/i)
   })
 
   it('deletes a recipe using the API', async () => {
@@ -310,14 +326,14 @@ describe('recipe form', () => {
 
     await user.type(screen.getByLabelText(/ingrediente 1/i), '2 ovos')
     await user.click(screen.getByRole('button', { name: /\+ adicionar ingrediente/i }))
-    await user.type(screen.getByLabelText(/ingrediente 2/i), '1 xícara de leite')
+    await user.type(screen.getByLabelText(/ingrediente 2/i), '1 xÃ­cara de leite')
 
     await user.type(screen.getByLabelText(/etapa 1/i), 'Misture os ingredientes')
     await user.click(screen.getByRole('button', { name: /\+ adicionar etapa/i }))
     await user.type(screen.getByLabelText(/etapa 2/i), 'Leve ao forno')
 
     expect(screen.getByDisplayValue('2 ovos')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('1 xícara de leite')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('1 xÃ­cara de leite')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Misture os ingredientes')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Leve ao forno')).toBeInTheDocument()
   })
@@ -328,7 +344,7 @@ describe('recipe form', () => {
 
     await user.click(screen.getByRole('button', { name: /salvar receita/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/preencha título/i)
+    expect(screen.getByRole('alert')).toHaveTextContent(/preencha tÃ­tulo/i)
     expect(createRecipeRequest).not.toHaveBeenCalled()
   })
 
@@ -337,8 +353,8 @@ describe('recipe form', () => {
     setRoute('/receitas/nova')
     render(<App />)
 
-    await user.type(screen.getByLabelText(/título/i), 'Bolo simples')
-    await user.type(screen.getByLabelText(/descrição/i), 'Bolo fácil para o café.')
+    await user.type(screen.getByLabelText(/tÃ­tulo/i), 'Bolo simples')
+    await user.type(screen.getByLabelText(/descriÃ§Ã£o/i), 'Bolo fÃ¡cil para o cafÃ©.')
     await user.type(screen.getByLabelText(/tempo de preparo/i), '30')
     await user.type(screen.getByLabelText(/ingrediente 1/i), '2 ovos')
     await user.type(screen.getByLabelText(/etapa 1/i), 'Misture tudo')
@@ -346,11 +362,11 @@ describe('recipe form', () => {
 
     expect(createRecipeRequest).toHaveBeenCalledWith({
       titulo: 'Bolo simples',
-      descricao: 'Bolo fácil para o café.',
+      descricao: 'Bolo fÃ¡cil para o cafÃ©.',
       ingredientes: ['2 ovos'],
       modoPreparo: ['Misture tudo'],
       tempoPreparo: 30,
-      categoria: 'Café da manhã',
+      categoria: 'CafÃ© da manhÃ£',
       imagemUrl: '',
     })
     expect(await screen.findByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
@@ -362,14 +378,14 @@ describe('recipe form', () => {
     setRoute('/receitas/nova')
     render(<App />)
 
-    await user.type(screen.getByLabelText(/título/i), 'Bolo simples')
-    await user.type(screen.getByLabelText(/descrição/i), 'Bolo fácil para o café.')
+    await user.type(screen.getByLabelText(/tÃ­tulo/i), 'Bolo simples')
+    await user.type(screen.getByLabelText(/descriÃ§Ã£o/i), 'Bolo fÃ¡cil para o cafÃ©.')
     await user.type(screen.getByLabelText(/tempo de preparo/i), '30')
     await user.type(screen.getByLabelText(/ingrediente 1/i), '2 ovos')
     await user.type(screen.getByLabelText(/etapa 1/i), 'Misture tudo')
     await user.click(screen.getByRole('button', { name: /salvar receita/i }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível salvar a receita/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/nÃ£o foi possÃ­vel salvar a receita/i)
   })
 
   it('loads a recipe and updates it using the API', async () => {
@@ -380,9 +396,9 @@ describe('recipe form', () => {
     expect(screen.getByLabelText(/carregando receita/i)).toBeInTheDocument()
     expect(await screen.findByDisplayValue('Bolo de cenoura')).toBeInTheDocument()
 
-    await user.clear(screen.getByLabelText(/título/i))
-    await user.type(screen.getByLabelText(/título/i), 'Bolo atualizado')
-    await user.click(screen.getByRole('button', { name: /salvar alterações/i }))
+    await user.clear(screen.getByLabelText(/tÃ­tulo/i))
+    await user.type(screen.getByLabelText(/tÃ­tulo/i), 'Bolo atualizado')
+    await user.click(screen.getByRole('button', { name: /salvar alteraÃ§Ãµes/i }))
 
     expect(updateRecipeRequest).toHaveBeenCalledWith('bolo-cenoura', {
       titulo: 'Bolo atualizado',
@@ -455,9 +471,28 @@ describe('comment form', () => {
     render(<App />)
 
     await screen.findByRole('heading', { name: /Bolo de cenoura/i })
-    await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
+    await user.click(screen.getByRole('button', { name: /enviar avaliaÃ§Ã£o/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/preencha o comentário/i)
+    expect(screen.getByRole('alert')).toHaveTextContent(/preencha o comentÃ¡rio/i)
+  })
+
+  it('loads comments from the backend API', async () => {
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(screen.getByLabelText(/carregando comentÃ¡rios/i)).toBeInTheDocument()
+    expect(await screen.findByText(/Ficou perfeito para o cafÃ©/i)).toBeInTheDocument()
+    expect(screen.getByText(/Rafaela/i)).toBeInTheDocument()
+    expect(listCommentsRequest).toHaveBeenCalledWith('bolo-cenoura')
+  })
+
+  it('shows an error when comments cannot be loaded', async () => {
+    listCommentsRequest.mockRejectedValue(new Error('Falha ao carregar comentÃ¡rios'))
+
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/nÃ£o foi possÃ­vel carregar os comentÃ¡rios/i)
   })
 
   it('accepts a valid comment and rating', async () => {
@@ -466,11 +501,11 @@ describe('comment form', () => {
     render(<App />)
 
     await screen.findByRole('heading', { name: /Bolo de cenoura/i })
-    await user.type(screen.getByLabelText(/comentário/i), 'Ficou muito bom')
-    await user.selectOptions(screen.getByLabelText(/nota/i), '5')
-    await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
+    await user.type(screen.getByLabelText(/^comentário$/i), 'Ficou muito bom')
+    await user.selectOptions(screen.getByLabelText(/^nota$/i), '5')
+    await user.click(screen.getByRole('button', { name: /enviar avaliaÃ§Ã£o/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/comentário pronto/i)
+    expect(screen.getByRole('alert')).toHaveTextContent(/comentÃ¡rio pronto/i)
   })
 })
 
@@ -485,7 +520,7 @@ describe('history form', () => {
     setRoute('/historico')
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: /salvar histórico/i }))
+    await user.click(screen.getByRole('button', { name: /salvar histÃ³rico/i }))
 
     expect(screen.getByRole('alert')).toHaveTextContent(/selecione uma receita/i)
   })
@@ -498,10 +533,10 @@ describe('history form', () => {
     await user.selectOptions(screen.getByLabelText(/receita feita/i), 'bolo-cenoura')
     await user.type(screen.getByLabelText(/^data$/i), '2026-05-31')
     await user.selectOptions(screen.getByLabelText(/nota pessoal opcional/i), '5')
-    await user.type(screen.getByLabelText(/observação opcional/i), 'Ficou ótimo para o café.')
-    await user.click(screen.getByRole('button', { name: /salvar histórico/i }))
+    await user.type(screen.getByLabelText(/observaÃ§Ã£o opcional/i), 'Ficou Ã³timo para o cafÃ©.')
+    await user.click(screen.getByRole('button', { name: /salvar histÃ³rico/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/registro de histórico pronto/i)
+    expect(screen.getByRole('alert')).toHaveTextContent(/registro de histÃ³rico pronto/i)
   })
 })
 
