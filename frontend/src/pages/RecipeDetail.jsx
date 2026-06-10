@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CommentForm from '../components/CommentForm'
 import CommentList from '../components/CommentList'
-import { listCommentsRequest } from '../services/commentApi'
+import { createCommentRequest, listCommentsRequest } from '../services/commentApi'
 import { deleteRecipeRequest, getRecipeRequest } from '../services/recipeApi'
 
 export default function RecipeDetail() {
@@ -65,6 +65,16 @@ export default function RecipeDetail() {
       isMounted = false
     }
   }, [id, recipe])
+
+  const handleCreateComment = async ({ text, rating }) => {
+    const { comment } = await createCommentRequest({
+      receita: id,
+      texto: text,
+      nota: rating,
+    })
+
+    setComments((currentComments) => [comment, ...currentComments])
+  }
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -152,7 +162,7 @@ export default function RecipeDetail() {
       </section>
 
       <div className="mt-4">
-        <CommentForm />
+        <CommentForm onSubmit={handleCreateComment} />
       </div>
     </div>
   )

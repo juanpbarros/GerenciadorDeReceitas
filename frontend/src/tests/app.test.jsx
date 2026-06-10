@@ -2,7 +2,7 @@
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
-import { listCommentsRequest } from '../services/commentApi'
+import { createCommentRequest, listCommentsRequest } from '../services/commentApi'
 import {
   createRecipeRequest,
   deleteRecipeRequest,
@@ -19,6 +19,7 @@ jest.mock('../services/authApi', () => ({
 }))
 
 jest.mock('../services/commentApi', () => ({
+  createCommentRequest: jest.fn(),
   listCommentsRequest: jest.fn(),
 }))
 
@@ -81,6 +82,16 @@ function authenticate(user = AUTH_USER, token = 'jwt-token') {
 beforeEach(() => {
   jest.clearAllMocks()
   getCurrentUserRequest.mockResolvedValue({ user: AUTH_USER })
+  createCommentRequest.mockResolvedValue({
+    comment: {
+      id: 'comment-2',
+      recipeId: 'bolo-cenoura',
+      userId: AUTH_USER._id,
+      userName: AUTH_USER.nome,
+      text: 'Ficou muito bom',
+      rating: 5,
+    },
+  })
   listCommentsRequest.mockResolvedValue({ comments: API_COMMENTS })
   createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   deleteRecipeRequest.mockResolvedValue()
@@ -505,7 +516,27 @@ describe('comment form', () => {
     await user.selectOptions(screen.getByLabelText(/^nota$/i), '5')
     await user.click(screen.getByRole('button', { name: /enviar avaliaÃ§Ã£o/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/comentÃ¡rio pronto/i)
+    expect(createCommentRequest).toHaveBeenCalledWith({
+      receita: 'bolo-cenoura',
+      texto: 'Ficou muito bom',
+      nota: 5,
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/comentário publicado/i)
+    expect(screen.getByText('Ficou muito bom')).toBeInTheDocument()
+  })
+
+  it('shows an error when comment creation fails', async () => {
+    const user = userEvent.setup()
+    createCommentRequest.mockRejectedValue(new Error('Falha ao criar comentário'))
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.type(screen.getByLabelText(/^comentário$/i), 'Ficou muito bom')
+    await user.selectOptions(screen.getByLabelText(/^nota$/i), '5')
+    await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível publicar/i)
   })
 })
 

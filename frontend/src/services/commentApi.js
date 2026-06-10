@@ -24,3 +24,11 @@ export async function listCommentsRequest(recipeId) {
     comments: response.data.comments.map(normalizeComment),
   }
 }
+
+export async function createCommentRequest({ receita, texto, nota }) {
+  const response = await apiClient.post('/comments', { receita, texto, nota })
+
+  return {
+    comment: normalizeComment(response.data.comment),
+  }
+}
