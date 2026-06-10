@@ -46,7 +46,9 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Estados de carregamento e mensagens de erro nas telas de receitas.
 - Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
 - Formulários principais criados para receitas, lista de compras, comentários e histórico.
-- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros, formulários e ações de receitas.
+- Comentários da página de detalhes integrados com a API real.
+- Usuário autenticado pode criar, editar e excluir seus próprios comentários.
+- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros, formulários, ações de receitas e comentários integrados.
 
 ### Backend
 
@@ -299,10 +301,9 @@ Workflow:
 
 ## Roadmap incremental
 
-1. Integrar comentários do frontend com a API.
-2. Implementar favoritos, lista de compras e histórico com backend real.
-3. Integrar favoritos, lista de compras e histórico no frontend.
-4. Preparar deploy do frontend e backend.
+1. Implementar favoritos, lista de compras e histórico com backend real.
+2. Integrar favoritos, lista de compras e histórico no frontend.
+3. Preparar deploy do frontend e backend.
 
 ## Observações de regra de negócio
 
@@ -350,4 +351,10 @@ Para a issue de integração do CRUD de receitas no frontend, use:
 
 ```txt
 Closes #17
+```
+
+Para a issue de integração dos comentários do frontend com o backend, use:
+
+```txt
+Closes #20
 ```

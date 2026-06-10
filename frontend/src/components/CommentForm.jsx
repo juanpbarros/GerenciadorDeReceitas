@@ -1,11 +1,12 @@
 import { useState } from 'react'
 
-export default function CommentForm() {
+export default function CommentForm({ onSubmit }) {
   const [text, setText] = useState('')
   const [rating, setRating] = useState('')
   const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     if (!text.trim() || !rating) {
@@ -13,15 +14,34 @@ export default function CommentForm() {
       return
     }
 
-    setMessage('Comentário pronto para integração com o backend.')
+    if (!onSubmit) {
+      setMessage('Comentário pronto para integração com o backend.')
+      return
+    }
+
+    setIsSubmitting(true)
+    setMessage('')
+
+    try {
+      await onSubmit({ text: text.trim(), rating: Number(rating) })
+      setText('')
+      setRating('')
+      setMessage('Comentário publicado com sucesso.')
+    } catch {
+      setMessage('Não foi possível publicar o comentário.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
+
+  const isSuccess = message.includes('sucesso') || message.includes('pronto')
 
   return (
     <form className="border rounded-3 p-3" onSubmit={handleSubmit}>
       <h3 className="h6 mb-3">Comentário e avaliação</h3>
 
       {message && (
-        <div role="alert" className={`alert ${message.includes('pronto') ? 'alert-success' : 'alert-warning'} py-2`}>
+        <div role="alert" className={`alert ${isSuccess ? 'alert-success' : 'alert-warning'} py-2`}>
           {message}
         </div>
       )}
@@ -62,11 +82,10 @@ export default function CommentForm() {
       </div>
 
       <div className="d-flex justify-content-end">
-        <button type="submit" className="btn btn-dark">
-          Enviar avaliação
+        <button type="submit" className="btn btn-dark" disabled={isSubmitting}>
+          {isSubmitting ? 'Enviando...' : 'Enviar avaliação'}
         </button>
       </div>
     </form>
   )
 }
-

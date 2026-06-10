@@ -3,6 +3,12 @@ import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
 import {
+  createCommentRequest,
+  deleteCommentRequest,
+  listCommentsRequest,
+  updateCommentRequest,
+} from '../services/commentApi'
+import {
   createRecipeRequest,
   deleteRecipeRequest,
   getRecipeRequest,
@@ -15,6 +21,13 @@ jest.mock('../services/authApi', () => ({
   loginRequest: jest.fn(),
   registerRequest: jest.fn(),
   getCurrentUserRequest: jest.fn(),
+}))
+
+jest.mock('../services/commentApi', () => ({
+  createCommentRequest: jest.fn(),
+  deleteCommentRequest: jest.fn(),
+  listCommentsRequest: jest.fn(),
+  updateCommentRequest: jest.fn(),
 }))
 
 jest.mock('../services/recipeApi', () => ({
@@ -30,6 +43,16 @@ function setRoute(path) {
 }
 
 const AUTH_USER = { _id: '1', nome: 'Maria', email: 'maria@email.com' }
+const API_COMMENTS = [
+  {
+    id: 'comment-1',
+    recipeId: 'bolo-cenoura',
+    userId: '2',
+    userName: 'Rafaela',
+    text: 'Ficou perfeito para o café.',
+    rating: 5,
+  },
+]
 
 const API_RECIPES = [
   {
@@ -66,11 +89,33 @@ function authenticate(user = AUTH_USER, token = 'jwt-token') {
 beforeEach(() => {
   jest.clearAllMocks()
   getCurrentUserRequest.mockResolvedValue({ user: AUTH_USER })
+  createCommentRequest.mockResolvedValue({
+    comment: {
+      id: 'comment-2',
+      recipeId: 'bolo-cenoura',
+      userId: AUTH_USER._id,
+      userName: AUTH_USER.nome,
+      text: 'Ficou muito bom',
+      rating: 5,
+    },
+  })
+  deleteCommentRequest.mockResolvedValue()
+  listCommentsRequest.mockResolvedValue({ comments: API_COMMENTS })
   createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   deleteRecipeRequest.mockResolvedValue()
   getRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   listRecipesRequest.mockResolvedValue({ recipes: API_RECIPES })
   updateRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
+  updateCommentRequest.mockResolvedValue({
+    comment: {
+      id: 'comment-own',
+      recipeId: 'bolo-cenoura',
+      userId: AUTH_USER._id,
+      userName: AUTH_USER.nome,
+      text: 'Comentário editado',
+      rating: 4,
+    },
+  })
 })
 
 describe('routing/auth', () => {
@@ -460,17 +505,122 @@ describe('comment form', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/preencha o comentário/i)
   })
 
+  it('loads comments from the backend API', async () => {
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    expect(await screen.findByText(/Ficou perfeito para o café/i)).toBeInTheDocument()
+    expect(screen.getByText(/Rafaela/i)).toBeInTheDocument()
+    expect(listCommentsRequest).toHaveBeenCalledWith('bolo-cenoura')
+  })
+
+  it('shows an error when comments cannot be loaded', async () => {
+    listCommentsRequest.mockRejectedValue(new Error('Falha ao carregar comentários'))
+
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar os comentários/i)
+  })
+
   it('accepts a valid comment and rating', async () => {
     const user = userEvent.setup()
     setRoute('/receitas/bolo-cenoura')
     render(<App />)
 
     await screen.findByRole('heading', { name: /Bolo de cenoura/i })
-    await user.type(screen.getByLabelText(/comentário/i), 'Ficou muito bom')
-    await user.selectOptions(screen.getByLabelText(/nota/i), '5')
+    await user.type(screen.getByLabelText(/^comentário$/i), 'Ficou muito bom')
+    await user.selectOptions(screen.getByLabelText(/^nota$/i), '5')
     await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/comentário pronto/i)
+    expect(createCommentRequest).toHaveBeenCalledWith({
+      receita: 'bolo-cenoura',
+      texto: 'Ficou muito bom',
+      nota: 5,
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/comentário publicado/i)
+    expect(screen.getByText('Ficou muito bom')).toBeInTheDocument()
+  })
+
+  it('shows an error when comment creation fails', async () => {
+    const user = userEvent.setup()
+    createCommentRequest.mockRejectedValue(new Error('Falha ao criar comentário'))
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.type(screen.getByLabelText(/^comentário$/i), 'Ficou muito bom')
+    await user.selectOptions(screen.getByLabelText(/^nota$/i), '5')
+    await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível publicar/i)
+  })
+
+  it('allows the authenticated user to edit their own comment', async () => {
+    const user = userEvent.setup()
+    listCommentsRequest.mockResolvedValue({
+      comments: [
+        {
+          id: 'comment-own',
+          recipeId: 'bolo-cenoura',
+          userId: AUTH_USER._id,
+          userName: AUTH_USER.nome,
+          text: 'Texto antigo',
+          rating: 3,
+        },
+      ],
+    })
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByText('Texto antigo')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /editar comentário/i }))
+    await user.clear(screen.getByLabelText(/comentário editado/i))
+    await user.type(screen.getByLabelText(/comentário editado/i), 'Comentário editado')
+    await user.selectOptions(screen.getByLabelText(/nota editada/i), '4')
+    await user.click(screen.getByRole('button', { name: /salvar comentário/i }))
+
+    expect(updateCommentRequest).toHaveBeenCalledWith('comment-own', {
+      texto: 'Comentário editado',
+      nota: 4,
+    })
+    expect(await screen.findByText('Comentário editado')).toBeInTheDocument()
+  })
+
+  it('allows the authenticated user to delete their own comment', async () => {
+    const user = userEvent.setup()
+    listCommentsRequest.mockResolvedValue({
+      comments: [
+        {
+          id: 'comment-own',
+          recipeId: 'bolo-cenoura',
+          userId: AUTH_USER._id,
+          userName: AUTH_USER.nome,
+          text: 'Comentário para remover',
+          rating: 3,
+        },
+      ],
+    })
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByText('Comentário para remover')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /excluir comentário/i }))
+
+    expect(deleteCommentRequest).toHaveBeenCalledWith('comment-own')
+    expect(screen.queryByText('Comentário para remover')).not.toBeInTheDocument()
+  })
+
+  it('does not show edit or delete actions for comments from other users', async () => {
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByText(/Ficou perfeito para o café/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /editar comentário/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /excluir comentário/i })).not.toBeInTheDocument()
   })
 })
 

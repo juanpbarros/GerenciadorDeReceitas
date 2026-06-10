@@ -1,13 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CommentForm from '../components/CommentForm'
+import CommentList from '../components/CommentList'
+import { useAuth } from '../hooks/useAuth'
+import {
+  createCommentRequest,
+  deleteCommentRequest,
+  listCommentsRequest,
+  updateCommentRequest,
+} from '../services/commentApi'
 import { deleteRecipeRequest, getRecipeRequest } from '../services/recipeApi'
 
 export default function RecipeDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [recipe, setRecipe] = useState(null)
+  const [comments, setComments] = useState([])
+  const [commentsError, setCommentsError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingComments, setIsLoadingComments] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState('')
 
@@ -34,6 +46,56 @@ export default function RecipeDetail() {
       isMounted = false
     }
   }, [id])
+
+  useEffect(() => {
+    if (!recipe) return undefined
+
+    let isMounted = true
+
+    async function loadComments() {
+      setIsLoadingComments(true)
+      setCommentsError('')
+
+      try {
+        const { comments: loadedComments } = await listCommentsRequest(id)
+        if (isMounted) setComments(loadedComments)
+      } catch {
+        if (isMounted) setCommentsError('Não foi possível carregar os comentários.')
+      } finally {
+        if (isMounted) setIsLoadingComments(false)
+      }
+    }
+
+    loadComments()
+
+    return () => {
+      isMounted = false
+    }
+  }, [id, recipe])
+
+  const handleCreateComment = async ({ text, rating }) => {
+    const { comment } = await createCommentRequest({
+      receita: id,
+      texto: text,
+      nota: rating,
+    })
+
+    setComments((currentComments) => [comment, ...currentComments])
+  }
+
+  const handleUpdateComment = async (commentId, { text, rating }) => {
+    const { comment } = await updateCommentRequest(commentId, {
+      texto: text,
+      nota: rating,
+    })
+
+    setComments((currentComments) => currentComments.map((item) => (item.id === commentId ? comment : item)))
+  }
+
+  const handleDeleteComment = async (commentId) => {
+    await deleteCommentRequest(commentId)
+    setComments((currentComments) => currentComments.filter((comment) => comment.id !== commentId))
+  }
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -113,8 +175,22 @@ export default function RecipeDetail() {
         <span>Nota: {recipe.rating}</span>
       </div>
 
+      <section className="mt-4">
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <h3 className="h5 mb-0">Comentários</h3>
+        </div>
+        <CommentList
+          comments={comments}
+          currentUserId={user?._id}
+          error={commentsError}
+          isLoading={isLoadingComments}
+          onDelete={handleDeleteComment}
+          onUpdate={handleUpdateComment}
+        />
+      </section>
+
       <div className="mt-4">
-        <CommentForm />
+        <CommentForm onSubmit={handleCreateComment} />
       </div>
     </div>
   )
