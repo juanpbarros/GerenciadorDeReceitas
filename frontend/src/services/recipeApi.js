@@ -29,3 +29,11 @@ export async function listRecipesRequest({ busca = '', categoria = '' } = {}) {
     recipes: response.data.recipes.map(normalizeRecipe),
   }
 }
+
+export async function createRecipeRequest(recipe) {
+  const response = await apiClient.post('/recipes', recipe)
+
+  return {
+    recipe: normalizeRecipe(response.data.recipe),
+  }
+}

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import DynamicTextList from '../components/DynamicTextList'
 import { RECIPE_CATEGORIES } from '../data/mockRecipes'
+import { createRecipeRequest } from '../services/recipeApi'
 
 const initialForm = {
   title: '',
@@ -14,8 +16,10 @@ const initialForm = {
 
 export default function RecipeForm({ mode }) {
   const isEdit = mode === 'edit'
+  const navigate = useNavigate()
   const [form, setForm] = useState(initialForm)
   const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const cleanPreview = useMemo(() => ({
     title: form.title.trim(),
@@ -32,15 +36,35 @@ export default function RecipeForm({ mode }) {
     setMessage('')
   }
 
-  const handleSubmit = (event) => {
+  const toApiPayload = () => ({
+    titulo: cleanPreview.title,
+    descricao: cleanPreview.description,
+    ingredientes: cleanPreview.ingredients,
+    modoPreparo: cleanPreview.preparationSteps,
+    tempoPreparo: cleanPreview.prepTimeMinutes,
+    categoria: cleanPreview.category,
+    imagemUrl: cleanPreview.imageUrl || '',
+  })
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
-    if (!cleanPreview.title || cleanPreview.ingredients.length === 0 || cleanPreview.preparationSteps.length === 0) {
-      setMessage('Preencha título, pelo menos um ingrediente e pelo menos uma etapa de preparo.')
+    if (!cleanPreview.title || !cleanPreview.description || !cleanPreview.prepTimeMinutes || cleanPreview.ingredients.length === 0 || cleanPreview.preparationSteps.length === 0) {
+      setMessage('Preencha título, descrição, tempo de preparo, pelo menos um ingrediente e pelo menos uma etapa de preparo.')
       return
     }
 
-    setMessage('Receita pronta para integração com o backend.')
+    setIsSubmitting(true)
+    setMessage('')
+
+    try {
+      await createRecipeRequest(toApiPayload())
+      navigate('/receitas')
+    } catch {
+      setMessage('Não foi possível salvar a receita. Tente novamente.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -55,7 +79,7 @@ export default function RecipeForm({ mode }) {
       </div>
 
       {message && (
-        <div role="alert" className={`alert ${message.includes('pronta') ? 'alert-success' : 'alert-warning'}`}>
+        <div role="alert" className="alert alert-warning">
           {message}
         </div>
       )}
@@ -143,12 +167,11 @@ export default function RecipeForm({ mode }) {
         </div>
 
         <div className="col-12 d-flex justify-content-end gap-2">
-          <button type="submit" className="btn btn-dark">
-            {isEdit ? 'Salvar alterações' : 'Salvar receita'}
+          <button type="submit" className="btn btn-dark" disabled={isSubmitting}>
+            {isSubmitting ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Salvar receita'}
           </button>
         </div>
       </form>
     </div>
   )
 }
-

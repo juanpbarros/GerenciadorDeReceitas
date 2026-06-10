@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
-import { listRecipesRequest } from '../services/recipeApi'
+import { createRecipeRequest, listRecipesRequest } from '../services/recipeApi'
 import { TOKEN_KEY } from '../services/tokenStorage'
 
 jest.mock('../services/authApi', () => ({
@@ -12,6 +12,7 @@ jest.mock('../services/authApi', () => ({
 }))
 
 jest.mock('../services/recipeApi', () => ({
+  createRecipeRequest: jest.fn(),
   listRecipesRequest: jest.fn(),
 }))
 
@@ -56,6 +57,7 @@ function authenticate(user = AUTH_USER, token = 'jwt-token') {
 beforeEach(() => {
   jest.clearAllMocks()
   getCurrentUserRequest.mockResolvedValue({ user: AUTH_USER })
+  createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   listRecipesRequest.mockResolvedValue({ recipes: API_RECIPES })
 })
 
@@ -269,7 +271,6 @@ describe('recipe form', () => {
     expect(screen.getByDisplayValue('Misture os ingredientes')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Leve ao forno')).toBeInTheDocument()
   })
-
   it('shows validation message when required recipe fields are empty', async () => {
     const user = userEvent.setup()
     setRoute('/receitas/nova')
@@ -278,19 +279,47 @@ describe('recipe form', () => {
     await user.click(screen.getByRole('button', { name: /salvar receita/i }))
 
     expect(screen.getByRole('alert')).toHaveTextContent(/preencha título/i)
+    expect(createRecipeRequest).not.toHaveBeenCalled()
   })
 
-  it('accepts a minimally valid recipe form', async () => {
+  it('creates a recipe using the API', async () => {
     const user = userEvent.setup()
     setRoute('/receitas/nova')
     render(<App />)
 
     await user.type(screen.getByLabelText(/título/i), 'Bolo simples')
+    await user.type(screen.getByLabelText(/descrição/i), 'Bolo fácil para o café.')
+    await user.type(screen.getByLabelText(/tempo de preparo/i), '30')
     await user.type(screen.getByLabelText(/ingrediente 1/i), '2 ovos')
     await user.type(screen.getByLabelText(/etapa 1/i), 'Misture tudo')
     await user.click(screen.getByRole('button', { name: /salvar receita/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/pronta para integração/i)
+    expect(createRecipeRequest).toHaveBeenCalledWith({
+      titulo: 'Bolo simples',
+      descricao: 'Bolo fácil para o café.',
+      ingredientes: ['2 ovos'],
+      modoPreparo: ['Misture tudo'],
+      tempoPreparo: 30,
+      categoria: 'Café da manhã',
+      imagemUrl: '',
+    })
+    expect(await screen.findByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
+  })
+
+  it('shows an error when recipe creation fails', async () => {
+    const user = userEvent.setup()
+    createRecipeRequest.mockRejectedValue(new Error('Falha na API'))
+    setRoute('/receitas/nova')
+    render(<App />)
+
+    await user.type(screen.getByLabelText(/título/i), 'Bolo simples')
+    await user.type(screen.getByLabelText(/descrição/i), 'Bolo fácil para o café.')
+    await user.type(screen.getByLabelText(/tempo de preparo/i), '30')
+    await user.type(screen.getByLabelText(/ingrediente 1/i), '2 ovos')
+    await user.type(screen.getByLabelText(/etapa 1/i), 'Misture tudo')
+    await user.click(screen.getByRole('button', { name: /salvar receita/i }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível salvar a receita/i)
   })
 })
 
@@ -399,4 +428,5 @@ describe('history form', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/registro de histórico pronto/i)
   })
 })
+
 
