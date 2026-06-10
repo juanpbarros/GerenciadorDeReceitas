@@ -1,4 +1,4 @@
-# Sistema Web de Receitas (Trabalho Escolar)
+﻿# Sistema Web de Receitas (Trabalho Escolar)
 
 Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequenas, com **testes automatizados** criados e executados junto de cada funcionalidade.
 
@@ -8,25 +8,25 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - UI: Bootstrap + CSS
 - Backend: Node.js + Express
 - Banco de dados: MongoDB Atlas com Mongoose
-- Autenticação: JWT + Argon2
+- AutenticaÃ§Ã£o: JWT + Argon2
 - Testes:
   - Frontend: Jest + React Testing Library
   - Backend: Jest + Supertest
 - CI: GitHub Actions
 
-## Estrutura do repositório
+## Estrutura do repositÃ³rio
 
-- `frontend/` — aplicação React com Vite
-- `backend/` — API Node.js com Express
-- `backend/src/config/` — configurações do backend, incluindo conexão com banco
-- `backend/src/controllers/` — controllers da API
-- `backend/src/middlewares/` — middlewares de erro e autenticação
-- `backend/src/models/` — models do Mongoose
-- `backend/src/routes/` — rotas da API
-- `backend/src/services/` — serviços auxiliares, como autenticação
-- `.github/workflows/` — workflows de integração contínua
-- `.env.example` — modelo de variáveis de ambiente
-- `README.md` — documentação do projeto
+- `frontend/` â€” aplicaÃ§Ã£o React com Vite
+- `backend/` â€” API Node.js com Express
+- `backend/src/config/` â€” configuraÃ§Ãµes do backend, incluindo conexÃ£o com banco
+- `backend/src/controllers/` â€” controllers da API
+- `backend/src/middlewares/` â€” middlewares de erro e autenticaÃ§Ã£o
+- `backend/src/models/` â€” models do Mongoose
+- `backend/src/routes/` â€” rotas da API
+- `backend/src/services/` â€” serviÃ§os auxiliares, como autenticaÃ§Ã£o
+- `.github/workflows/` â€” workflows de integraÃ§Ã£o contÃ­nua
+- `.env.example` â€” modelo de variÃ¡veis de ambiente
+- `README.md` â€” documentaÃ§Ã£o do projeto
 
 ## Status atual
 
@@ -34,56 +34,58 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 
 - Layout autenticado com Topbar e Sidebar.
 - Sidebar conectada ao canto da tela, usando Bootstrap + CSS.
-- Rotas públicas para login e cadastro.
-- Rotas protegidas para dashboard, receitas, favoritos, lista de compras, histórico e perfil.
-- Autenticação real integrada com a API do backend.
+- Rotas pÃºblicas para login e cadastro.
+- Rotas protegidas para dashboard, receitas, favoritos, lista de compras, histÃ³rico e perfil.
+- AutenticaÃ§Ã£o real integrada com a API do backend.
 - Login e cadastro consomem `/api/auth/login` e `/api/auth/register`.
-- Token JWT salvo no navegador e enviado automaticamente nas requisições autenticadas.
-- Sessão restaurada via `/api/auth/me` quando existe token salvo.
-- Logout remove token e usuário do navegador.
+- Token JWT salvo no navegador e enviado automaticamente nas requisiÃ§Ãµes autenticadas.
+- SessÃ£o restaurada via `/api/auth/me` quando existe token salvo.
+- Logout remove token e usuÃ¡rio do navegador.
 - Listagem real de receitas consumindo a API, com busca e filtro por categoria.
-- Cadastro, edição, visualização e exclusão de receitas integrados com a API.
+- Cadastro, ediÃ§Ã£o, visualizaÃ§Ã£o e exclusÃ£o de receitas integrados com a API.
 - Estados de carregamento e mensagens de erro nas telas de receitas.
-- Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
-- Formulários principais criados para receitas, lista de compras, comentários e histórico.
-- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros, formulários e ações de receitas.
+- Biblioteca pessoal de receitas, separando receitas prÃ³prias e receitas adicionadas de outros usuÃ¡rios.
+- FormulÃ¡rios principais criados para receitas, lista de compras, comentÃ¡rios e histÃ³rico.
+- Comentários da página de detalhes integrados com a API real.
+- Usuário autenticado pode criar, editar e excluir seus próprios comentários.
+- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros, formulários, ações de receitas e comentários integrados.
 
 ### Backend
 
 - API Express configurada.
-- Conexão com MongoDB Atlas via `MONGODB_URI`.
-- Autenticação com cadastro, login, JWT e middleware de rota protegida.
+- ConexÃ£o com MongoDB Atlas via `MONGODB_URI`.
+- AutenticaÃ§Ã£o com cadastro, login, JWT e middleware de rota protegida.
 - Senhas armazenadas com hash usando Argon2.
 - Model base de receitas criado com ingredientes e modo de preparo como listas de strings.
-- Model base de comentários criado com relação para usuário e receita.
+- Model base de comentÃ¡rios criado com relaÃ§Ã£o para usuÃ¡rio e receita.
 - Categorias de receitas definidas por enum no backend.
-- Rota de saúde disponível em `GET /api/health`.
-- Rotas de autenticação disponíveis em `/api/auth`.
-- CRUD de receitas disponível em `/api/recipes`, com ações protegidas por JWT.
-- CRUD de comentários disponível em `/api/comments`.
-- Middleware para rota não encontrada.
+- Rota de saÃºde disponÃ­vel em `GET /api/health`.
+- Rotas de autenticaÃ§Ã£o disponÃ­veis em `/api/auth`.
+- CRUD de receitas disponÃ­vel em `/api/recipes`, com aÃ§Ãµes protegidas por JWT.
+- CRUD de comentÃ¡rios disponÃ­vel em `/api/comments`.
+- Middleware para rota nÃ£o encontrada.
 - Middleware central de erro.
-- Testes automatizados com Jest + Supertest, incluindo validações dos models base e rotas de comentários.
+- Testes automatizados com Jest + Supertest, incluindo validaÃ§Ãµes dos models base e rotas de comentÃ¡rios.
 
-### Integração contínua
+### IntegraÃ§Ã£o contÃ­nua
 
 - Workflow de CI configurado em `.github/workflows/ci.yml`.
 - A pipeline roda automaticamente em Pull Requests para `main`.
-- A pipeline também roda em pushes para `main`.
-- O CI instala dependências com `npm ci`.
+- A pipeline tambÃ©m roda em pushes para `main`.
+- O CI instala dependÃªncias com `npm ci`.
 - O CI executa testes do frontend.
 - O CI gera o build do frontend.
 - O CI executa testes do backend.
 
 ## Como rodar o projeto
 
-Pré-requisitos:
+PrÃ©-requisitos:
 
-- Node.js instalado, de preferência versão LTS.
+- Node.js instalado, de preferÃªncia versÃ£o LTS.
 - Conta gratuita no MongoDB Atlas.
 - Cluster criado no MongoDB Atlas.
 
-### Instalar dependências
+### Instalar dependÃªncias
 
 Na raiz do projeto:
 
@@ -91,7 +93,7 @@ Na raiz do projeto:
 npm install
 ```
 
-## Configurar variáveis de ambiente
+## Configurar variÃ¡veis de ambiente
 
 Copie o arquivo de exemplo:
 
@@ -126,12 +128,12 @@ Em desenvolvimento, esse valor usa o proxy do Vite para encaminhar chamadas `/ap
 No MongoDB Atlas:
 
 - Crie um cluster gratuito.
-- Crie um usuário de banco com senha forte.
+- Crie um usuÃ¡rio de banco com senha forte.
 - Libere seu IP em **Network Access**.
 - Copie a connection string do cluster.
 - Substitua `usuario`, `senha` e `cluster` no `.env`.
 
-Para desenvolvimento escolar, é comum liberar temporariamente `0.0.0.0/0` no Atlas, mas isso permite conexão de qualquer IP. Use apenas se necessário e com senha forte.
+Para desenvolvimento escolar, Ã© comum liberar temporariamente `0.0.0.0/0` no Atlas, mas isso permite conexÃ£o de qualquer IP. Use apenas se necessÃ¡rio e com senha forte.
 
 ## Rodar o frontend
 
@@ -152,8 +154,8 @@ Fluxo sugerido:
 - Inicie o frontend em `http://localhost:5173`.
 - Acesse `/register` para criar uma conta real.
 - Use essa conta em `/login`.
-- Recarregue a página para validar a restauração da sessão via token.
-- Clique em logout para remover token e usuário salvos.
+- Recarregue a pÃ¡gina para validar a restauraÃ§Ã£o da sessÃ£o via token.
+- Clique em logout para remover token e usuÃ¡rio salvos.
 
 ## Rodar o backend
 
@@ -162,7 +164,7 @@ cd backend
 npm run dev
 ```
 
-A API sobe por padrão em:
+A API sobe por padrÃ£o em:
 
 - `http://localhost:3000`
 
@@ -180,33 +182,33 @@ Resposta esperada:
 
 ## Rotas da API
 
-### Saúde
+### SaÃºde
 
-- `GET /api/health` — verifica se a API está respondendo.
+- `GET /api/health` â€” verifica se a API estÃ¡ respondendo.
 
-### Autenticação
+### AutenticaÃ§Ã£o
 
-- `POST /api/auth/register` — cadastra usuário.
-- `POST /api/auth/login` — autentica usuário e retorna JWT.
-- `GET /api/auth/me` — retorna usuário logado, exigindo token Bearer.
+- `POST /api/auth/register` â€” cadastra usuÃ¡rio.
+- `POST /api/auth/login` â€” autentica usuÃ¡rio e retorna JWT.
+- `GET /api/auth/me` â€” retorna usuÃ¡rio logado, exigindo token Bearer.
 
 ### Receitas
 
-- `GET /api/recipes` — lista receitas, exigindo token Bearer.
-- `GET /api/recipes?busca=bolo` — busca receitas por título ou descrição.
-- `GET /api/recipes?categoria=Sobremesa` — filtra receitas por categoria.
-- `GET /api/recipes/:id` — busca detalhes de uma receita.
-- `POST /api/recipes` — cria receita para o usuário logado.
-- `PATCH /api/recipes/:id` — edita receita do dono logado.
-- `DELETE /api/recipes/:id` — remove receita do dono logado.
+- `GET /api/recipes` â€” lista receitas, exigindo token Bearer.
+- `GET /api/recipes?busca=bolo` â€” busca receitas por tÃ­tulo ou descriÃ§Ã£o.
+- `GET /api/recipes?categoria=Sobremesa` â€” filtra receitas por categoria.
+- `GET /api/recipes/:id` â€” busca detalhes de uma receita.
+- `POST /api/recipes` â€” cria receita para o usuÃ¡rio logado.
+- `PATCH /api/recipes/:id` â€” edita receita do dono logado.
+- `DELETE /api/recipes/:id` â€” remove receita do dono logado.
 
 Exemplo de receita:
 
 ```json
 {
   "titulo": "Bolo de cenoura",
-  "descricao": "Receita simples para o café da tarde.",
-  "ingredientes": ["2 cenouras", "2 ovos", "1 xícara de açúcar"],
+  "descricao": "Receita simples para o cafÃ© da tarde.",
+  "ingredientes": ["2 cenouras", "2 ovos", "1 xÃ­cara de aÃ§Ãºcar"],
   "modoPreparo": ["Bata os ingredientes", "Leve ao forno"],
   "tempoPreparo": 45,
   "categoria": "Sobremesa",
@@ -214,16 +216,16 @@ Exemplo de receita:
 }
 ```
 
-### Comentários
+### ComentÃ¡rios
 
-- `GET /api/comments` — lista comentários.
-- `GET /api/comments?receita=idDaReceita` — lista comentários de uma receita.
-- `GET /api/comments/:id` — busca um comentário.
-- `POST /api/comments` — cria comentário, exigindo token Bearer.
-- `PUT /api/comments/:id` — edita comentário do autor logado, exigindo token Bearer.
-- `DELETE /api/comments/:id` — remove comentário do autor logado, exigindo token Bearer.
+- `GET /api/comments` â€” lista comentÃ¡rios.
+- `GET /api/comments?receita=idDaReceita` â€” lista comentÃ¡rios de uma receita.
+- `GET /api/comments/:id` â€” busca um comentÃ¡rio.
+- `POST /api/comments` â€” cria comentÃ¡rio, exigindo token Bearer.
+- `PUT /api/comments/:id` â€” edita comentÃ¡rio do autor logado, exigindo token Bearer.
+- `DELETE /api/comments/:id` â€” remove comentÃ¡rio do autor logado, exigindo token Bearer.
 
-Exemplo de comentário:
+Exemplo de comentÃ¡rio:
 
 ```json
 {
@@ -274,7 +276,7 @@ npm run build
 
 ## GitHub Actions
 
-A CI do projeto valida automaticamente os principais pontos antes de uma alteração entrar na `main`.
+A CI do projeto valida automaticamente os principais pontos antes de uma alteraÃ§Ã£o entrar na `main`.
 
 Workflow:
 
@@ -290,43 +292,42 @@ Workflow:
 
 ## Funcionalidades planejadas
 
-- Favoritos individuais por usuário.
+- Favoritos individuais por usuÃ¡rio.
 - Checklist para fazer receita e identificar ingredientes faltantes.
 - Lista de compras gerada a partir dos ingredientes faltantes.
-- Histórico persistido de receitas feitas.
-- Compartilhamento de receitas por link e Web Share API quando disponível.
+- HistÃ³rico persistido de receitas feitas.
+- Compartilhamento de receitas por link e Web Share API quando disponÃ­vel.
 - Deploy do frontend e backend.
 
 ## Roadmap incremental
 
-1. Integrar comentários do frontend com a API.
-2. Implementar favoritos, lista de compras e histórico com backend real.
-3. Integrar favoritos, lista de compras e histórico no frontend.
-4. Preparar deploy do frontend e backend.
+1. Implementar favoritos, lista de compras e histórico com backend real.
+2. Integrar favoritos, lista de compras e histórico no frontend.
+3. Preparar deploy do frontend e backend.
 
-## Observações de regra de negócio
+## ObservaÃ§Ãµes de regra de negÃ³cio
 
-- Categorias são pré-definidas e não terão CRUD próprio.
-- Ingredientes não terão CRUD próprio; serão salvos como lista de strings dentro da receita.
-- Modo de preparo também será salvo como lista de strings dentro da receita.
-- Receitas próprias aparecem como parte da biblioteca do usuário.
-- Receitas de outras pessoas adicionadas à biblioteca devem indicar o autor original.
+- Categorias sÃ£o prÃ©-definidas e nÃ£o terÃ£o CRUD prÃ³prio.
+- Ingredientes nÃ£o terÃ£o CRUD prÃ³prio; serÃ£o salvos como lista de strings dentro da receita.
+- Modo de preparo tambÃ©m serÃ¡ salvo como lista de strings dentro da receita.
+- Receitas prÃ³prias aparecem como parte da biblioteca do usuÃ¡rio.
+- Receitas de outras pessoas adicionadas Ã  biblioteca devem indicar o autor original.
 - O nome do autor original aparece apenas quando a receita foi adicionada de outra pessoa.
 
-## Segurança e variáveis de ambiente
+## SeguranÃ§a e variÃ¡veis de ambiente
 
-- O arquivo `.env` real não deve ser commitado.
-- Credenciais do MongoDB Atlas, `JWT_SECRET` e URLs de produção devem ficar apenas no ambiente local ou no serviço de deploy.
-- O repositório deve manter apenas exemplos seguros, como `.env.example`.
+- O arquivo `.env` real nÃ£o deve ser commitado.
+- Credenciais do MongoDB Atlas, `JWT_SECRET` e URLs de produÃ§Ã£o devem ficar apenas no ambiente local ou no serviÃ§o de deploy.
+- O repositÃ³rio deve manter apenas exemplos seguros, como `.env.example`.
 - Antes de qualquer commit envolvendo backend, banco ou deploy, conferir `git status` para evitar subir segredos.
-- Não use usuário administrador global do Atlas se não for necessário.
-- Use senha forte para o usuário do banco.
-- Senhas de usuários da aplicação são salvas apenas como hash.
-- A API não retorna `passwordHash` nas respostas.
+- NÃ£o use usuÃ¡rio administrador global do Atlas se nÃ£o for necessÃ¡rio.
+- Use senha forte para o usuÃ¡rio do banco.
+- Senhas de usuÃ¡rios da aplicaÃ§Ã£o sÃ£o salvas apenas como hash.
+- A API nÃ£o retorna `passwordHash` nas respostas.
 
-## Controle de versão
+## Controle de versÃ£o
 
-O projeto está sendo desenvolvido com commits pequenos e organizados.
+O projeto estÃ¡ sendo desenvolvido com commits pequenos e organizados.
 
 Cada Pull Request deve informar as issues relacionadas usando:
 
@@ -334,13 +335,13 @@ Cada Pull Request deve informar as issues relacionadas usando:
 Closes #numero-da-issue
 ```
 
-Para a issue de autenticação backend, use:
+Para a issue de autenticaÃ§Ã£o backend, use:
 
 ```txt
 Closes #12
 ```
 
-Para a issue de integração da autenticação do frontend com o backend, use:
+Para a issue de integraÃ§Ã£o da autenticaÃ§Ã£o do frontend com o backend, use:
 
 ```txt
 Closes #13
@@ -350,4 +351,10 @@ Para a issue de integração do CRUD de receitas no frontend, use:
 
 ```txt
 Closes #17
+```
+
+Para a issue de integração dos comentários do frontend com o backend, use:
+
+```txt
+Closes #20
 ```
