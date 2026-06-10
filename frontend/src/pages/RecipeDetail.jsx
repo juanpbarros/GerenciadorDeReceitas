@@ -2,12 +2,19 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CommentForm from '../components/CommentForm'
 import CommentList from '../components/CommentList'
-import { createCommentRequest, listCommentsRequest } from '../services/commentApi'
+import { useAuth } from '../hooks/useAuth'
+import {
+  createCommentRequest,
+  deleteCommentRequest,
+  listCommentsRequest,
+  updateCommentRequest,
+} from '../services/commentApi'
 import { deleteRecipeRequest, getRecipeRequest } from '../services/recipeApi'
 
 export default function RecipeDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [recipe, setRecipe] = useState(null)
   const [comments, setComments] = useState([])
   const [commentsError, setCommentsError] = useState('')
@@ -74,6 +81,20 @@ export default function RecipeDetail() {
     })
 
     setComments((currentComments) => [comment, ...currentComments])
+  }
+
+  const handleUpdateComment = async (commentId, { text, rating }) => {
+    const { comment } = await updateCommentRequest(commentId, {
+      texto: text,
+      nota: rating,
+    })
+
+    setComments((currentComments) => currentComments.map((item) => (item.id === commentId ? comment : item)))
+  }
+
+  const handleDeleteComment = async (commentId) => {
+    await deleteCommentRequest(commentId)
+    setComments((currentComments) => currentComments.filter((comment) => comment.id !== commentId))
   }
 
   const handleDelete = async () => {
@@ -158,7 +179,14 @@ export default function RecipeDetail() {
         <div className="d-flex align-items-center justify-content-between mb-3">
           <h3 className="h5 mb-0">Comentários</h3>
         </div>
-        <CommentList comments={comments} error={commentsError} isLoading={isLoadingComments} />
+        <CommentList
+          comments={comments}
+          currentUserId={user?._id}
+          error={commentsError}
+          isLoading={isLoadingComments}
+          onDelete={handleDeleteComment}
+          onUpdate={handleUpdateComment}
+        />
       </section>
 
       <div className="mt-4">

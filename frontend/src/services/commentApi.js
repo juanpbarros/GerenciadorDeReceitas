@@ -32,3 +32,15 @@ export async function createCommentRequest({ receita, texto, nota }) {
     comment: normalizeComment(response.data.comment),
   }
 }
+
+export async function updateCommentRequest(id, { texto, nota }) {
+  const response = await apiClient.put(`/comments/${id}`, { texto, nota })
+
+  return {
+    comment: normalizeComment(response.data.comment),
+  }
+}
+
+export async function deleteCommentRequest(id) {
+  await apiClient.delete(`/comments/${id}`)
+}

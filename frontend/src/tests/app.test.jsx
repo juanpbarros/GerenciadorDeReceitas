@@ -2,7 +2,12 @@
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
-import { createCommentRequest, listCommentsRequest } from '../services/commentApi'
+import {
+  createCommentRequest,
+  deleteCommentRequest,
+  listCommentsRequest,
+  updateCommentRequest,
+} from '../services/commentApi'
 import {
   createRecipeRequest,
   deleteRecipeRequest,
@@ -20,7 +25,9 @@ jest.mock('../services/authApi', () => ({
 
 jest.mock('../services/commentApi', () => ({
   createCommentRequest: jest.fn(),
+  deleteCommentRequest: jest.fn(),
   listCommentsRequest: jest.fn(),
+  updateCommentRequest: jest.fn(),
 }))
 
 jest.mock('../services/recipeApi', () => ({
@@ -92,12 +99,23 @@ beforeEach(() => {
       rating: 5,
     },
   })
+  deleteCommentRequest.mockResolvedValue()
   listCommentsRequest.mockResolvedValue({ comments: API_COMMENTS })
   createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   deleteRecipeRequest.mockResolvedValue()
   getRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   listRecipesRequest.mockResolvedValue({ recipes: API_RECIPES })
   updateRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
+  updateCommentRequest.mockResolvedValue({
+    comment: {
+      id: 'comment-own',
+      recipeId: 'bolo-cenoura',
+      userId: AUTH_USER._id,
+      userName: AUTH_USER.nome,
+      text: 'Comentário editado',
+      rating: 4,
+    },
+  })
 })
 
 describe('routing/auth', () => {
@@ -537,6 +555,72 @@ describe('comment form', () => {
     await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível publicar/i)
+  })
+
+  it('allows the authenticated user to edit their own comment', async () => {
+    const user = userEvent.setup()
+    listCommentsRequest.mockResolvedValue({
+      comments: [
+        {
+          id: 'comment-own',
+          recipeId: 'bolo-cenoura',
+          userId: AUTH_USER._id,
+          userName: AUTH_USER.nome,
+          text: 'Texto antigo',
+          rating: 3,
+        },
+      ],
+    })
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByText('Texto antigo')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /editar comentário/i }))
+    await user.clear(screen.getByLabelText(/comentário editado/i))
+    await user.type(screen.getByLabelText(/comentário editado/i), 'Comentário editado')
+    await user.selectOptions(screen.getByLabelText(/nota editada/i), '4')
+    await user.click(screen.getByRole('button', { name: /salvar comentário/i }))
+
+    expect(updateCommentRequest).toHaveBeenCalledWith('comment-own', {
+      texto: 'Comentário editado',
+      nota: 4,
+    })
+    expect(await screen.findByText('Comentário editado')).toBeInTheDocument()
+  })
+
+  it('allows the authenticated user to delete their own comment', async () => {
+    const user = userEvent.setup()
+    listCommentsRequest.mockResolvedValue({
+      comments: [
+        {
+          id: 'comment-own',
+          recipeId: 'bolo-cenoura',
+          userId: AUTH_USER._id,
+          userName: AUTH_USER.nome,
+          text: 'Comentário para remover',
+          rating: 3,
+        },
+      ],
+    })
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByText('Comentário para remover')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /excluir comentário/i }))
+
+    expect(deleteCommentRequest).toHaveBeenCalledWith('comment-own')
+    expect(screen.queryByText('Comentário para remover')).not.toBeInTheDocument()
+  })
+
+  it('does not show edit or delete actions for comments from other users', async () => {
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByText(/Ficou perfeito para o café/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /editar comentário/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /excluir comentário/i })).not.toBeInTheDocument()
   })
 })
 
