@@ -37,3 +37,23 @@ export async function createRecipeRequest(recipe) {
     recipe: normalizeRecipe(response.data.recipe),
   }
 }
+
+export async function getRecipeRequest(id) {
+  const response = await apiClient.get(`/recipes/${id}`)
+
+  return {
+    recipe: normalizeRecipe(response.data.recipe),
+  }
+}
+
+export async function updateRecipeRequest(id, recipe) {
+  const response = await apiClient.patch(`/recipes/${id}`, recipe)
+
+  return {
+    recipe: normalizeRecipe(response.data.recipe),
+  }
+}
+
+export async function deleteRecipeRequest(id) {
+  await apiClient.delete(`/recipes/${id}`)
+}

@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import DynamicTextList from '../components/DynamicTextList'
 import { RECIPE_CATEGORIES } from '../data/mockRecipes'
-import { createRecipeRequest } from '../services/recipeApi'
+import { createRecipeRequest, getRecipeRequest, updateRecipeRequest } from '../services/recipeApi'
 
 const initialForm = {
   title: '',
@@ -17,8 +17,10 @@ const initialForm = {
 export default function RecipeForm({ mode }) {
   const isEdit = mode === 'edit'
   const navigate = useNavigate()
+  const { id } = useParams()
   const [form, setForm] = useState(initialForm)
   const [message, setMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(isEdit)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const cleanPreview = useMemo(() => ({
@@ -35,6 +37,42 @@ export default function RecipeForm({ mode }) {
     setForm((current) => ({ ...current, [field]: value }))
     setMessage('')
   }
+
+  useEffect(() => {
+    if (!isEdit) return undefined
+
+    let isMounted = true
+
+    async function loadRecipe() {
+      setIsLoading(true)
+      setMessage('')
+
+      try {
+        const { recipe } = await getRecipeRequest(id)
+        if (!isMounted) return
+
+        setForm({
+          title: recipe.title || '',
+          description: recipe.description || '',
+          prepTimeMinutes: recipe.prepTimeMinutes ? String(recipe.prepTimeMinutes) : '',
+          category: recipe.category || RECIPE_CATEGORIES[0],
+          imageUrl: recipe.imageUrl || '',
+          ingredients: recipe.ingredients.length > 0 ? recipe.ingredients : [''],
+          preparationSteps: recipe.preparationSteps.length > 0 ? recipe.preparationSteps : [''],
+        })
+      } catch {
+        if (isMounted) setMessage('Não foi possível carregar a receita.')
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+
+    loadRecipe()
+
+    return () => {
+      isMounted = false
+    }
+  }, [id, isEdit])
 
   const toApiPayload = () => ({
     titulo: cleanPreview.title,
@@ -58,7 +96,8 @@ export default function RecipeForm({ mode }) {
     setMessage('')
 
     try {
-      await createRecipeRequest(toApiPayload())
+      if (isEdit) await updateRecipeRequest(id, toApiPayload())
+      else await createRecipeRequest(toApiPayload())
       navigate('/receitas')
     } catch {
       setMessage('Não foi possível salvar a receita. Tente novamente.')
@@ -78,12 +117,20 @@ export default function RecipeForm({ mode }) {
         </div>
       </div>
 
+      {isLoading && (
+        <div className="empty-state border rounded-3 bg-light p-4 text-center">
+          <div className="spinner-border text-dark" role="status" aria-label="Carregando receita" />
+          <p className="text-secondary mt-3 mb-0">Carregando receita...</p>
+        </div>
+      )}
+
       {message && (
         <div role="alert" className="alert alert-warning">
           {message}
         </div>
       )}
 
+      {!isLoading && (
       <form className="row g-3" onSubmit={handleSubmit}>
         <div className="col-12 col-lg-8">
           <label className="form-label" htmlFor="title">Título</label>
@@ -172,6 +219,7 @@ export default function RecipeForm({ mode }) {
           </button>
         </div>
       </form>
+      )}
     </div>
   )
 }

@@ -2,7 +2,13 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
-import { createRecipeRequest, listRecipesRequest } from '../services/recipeApi'
+import {
+  createRecipeRequest,
+  deleteRecipeRequest,
+  getRecipeRequest,
+  listRecipesRequest,
+  updateRecipeRequest,
+} from '../services/recipeApi'
 import { TOKEN_KEY } from '../services/tokenStorage'
 
 jest.mock('../services/authApi', () => ({
@@ -13,7 +19,10 @@ jest.mock('../services/authApi', () => ({
 
 jest.mock('../services/recipeApi', () => ({
   createRecipeRequest: jest.fn(),
+  deleteRecipeRequest: jest.fn(),
+  getRecipeRequest: jest.fn(),
   listRecipesRequest: jest.fn(),
+  updateRecipeRequest: jest.fn(),
 }))
 
 function setRoute(path) {
@@ -58,7 +67,10 @@ beforeEach(() => {
   jest.clearAllMocks()
   getCurrentUserRequest.mockResolvedValue({ user: AUTH_USER })
   createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
+  deleteRecipeRequest.mockResolvedValue()
+  getRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   listRecipesRequest.mockResolvedValue({ recipes: API_RECIPES })
+  updateRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
 })
 
 describe('routing/auth', () => {
@@ -247,6 +259,44 @@ describe('recipes listing', () => {
   })
 })
 
+describe('recipe details', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    authenticate()
+  })
+
+  it('loads recipe details from the API', async () => {
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(screen.getByLabelText(/carregando receita/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /Bolo de cenoura/i })).toBeInTheDocument()
+    expect(screen.getByText(/2 cenouras/i)).toBeInTheDocument()
+    expect(getRecipeRequest).toHaveBeenCalledWith('bolo-cenoura')
+  })
+
+  it('shows an error when recipe details cannot be loaded', async () => {
+    getRecipeRequest.mockRejectedValue(new Error('Falha na API'))
+
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar a receita/i)
+  })
+
+  it('deletes a recipe using the API', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /excluir/i }))
+
+    expect(deleteRecipeRequest).toHaveBeenCalledWith('bolo-cenoura')
+    expect(await screen.findByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
+  })
+})
+
 describe('recipe form', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -321,6 +371,30 @@ describe('recipe form', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível salvar a receita/i)
   })
+
+  it('loads a recipe and updates it using the API', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/bolo-cenoura/editar')
+    render(<App />)
+
+    expect(screen.getByLabelText(/carregando receita/i)).toBeInTheDocument()
+    expect(await screen.findByDisplayValue('Bolo de cenoura')).toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText(/título/i))
+    await user.type(screen.getByLabelText(/título/i), 'Bolo atualizado')
+    await user.click(screen.getByRole('button', { name: /salvar alterações/i }))
+
+    expect(updateRecipeRequest).toHaveBeenCalledWith('bolo-cenoura', {
+      titulo: 'Bolo atualizado',
+      descricao: 'Bolo caseiro fofinho.',
+      ingredientes: ['2 cenouras', '2 ovos'],
+      modoPreparo: ['Bata tudo', 'Leve ao forno'],
+      tempoPreparo: 45,
+      categoria: 'Sobremesa',
+      imagemUrl: '',
+    })
+    expect(await screen.findByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
+  })
 })
 
 describe('shopping list form', () => {
@@ -380,6 +454,7 @@ describe('comment form', () => {
     setRoute('/receitas/bolo-cenoura')
     render(<App />)
 
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
     await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
 
     expect(screen.getByRole('alert')).toHaveTextContent(/preencha o comentário/i)
@@ -390,6 +465,7 @@ describe('comment form', () => {
     setRoute('/receitas/bolo-cenoura')
     render(<App />)
 
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
     await user.type(screen.getByLabelText(/comentário/i), 'Ficou muito bom')
     await user.selectOptions(screen.getByLabelText(/nota/i), '5')
     await user.click(screen.getByRole('button', { name: /enviar avaliação/i }))
