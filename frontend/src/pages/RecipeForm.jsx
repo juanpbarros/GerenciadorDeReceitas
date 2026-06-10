@@ -1,6 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import DynamicTextList from '../components/DynamicTextList'
 import { RECIPE_CATEGORIES } from '../data/mockRecipes'
+import { createRecipeRequest, getRecipeRequest, updateRecipeRequest } from '../services/recipeApi'
 
 const initialForm = {
   title: '',
@@ -14,8 +16,12 @@ const initialForm = {
 
 export default function RecipeForm({ mode }) {
   const isEdit = mode === 'edit'
+  const navigate = useNavigate()
+  const { id } = useParams()
   const [form, setForm] = useState(initialForm)
   const [message, setMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(isEdit)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const cleanPreview = useMemo(() => ({
     title: form.title.trim(),
@@ -32,15 +38,72 @@ export default function RecipeForm({ mode }) {
     setMessage('')
   }
 
-  const handleSubmit = (event) => {
+  useEffect(() => {
+    if (!isEdit) return undefined
+
+    let isMounted = true
+
+    async function loadRecipe() {
+      setIsLoading(true)
+      setMessage('')
+
+      try {
+        const { recipe } = await getRecipeRequest(id)
+        if (!isMounted) return
+
+        setForm({
+          title: recipe.title || '',
+          description: recipe.description || '',
+          prepTimeMinutes: recipe.prepTimeMinutes ? String(recipe.prepTimeMinutes) : '',
+          category: recipe.category || RECIPE_CATEGORIES[0],
+          imageUrl: recipe.imageUrl || '',
+          ingredients: recipe.ingredients.length > 0 ? recipe.ingredients : [''],
+          preparationSteps: recipe.preparationSteps.length > 0 ? recipe.preparationSteps : [''],
+        })
+      } catch {
+        if (isMounted) setMessage('Não foi possível carregar a receita.')
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+
+    loadRecipe()
+
+    return () => {
+      isMounted = false
+    }
+  }, [id, isEdit])
+
+  const toApiPayload = () => ({
+    titulo: cleanPreview.title,
+    descricao: cleanPreview.description,
+    ingredientes: cleanPreview.ingredients,
+    modoPreparo: cleanPreview.preparationSteps,
+    tempoPreparo: cleanPreview.prepTimeMinutes,
+    categoria: cleanPreview.category,
+    imagemUrl: cleanPreview.imageUrl || '',
+  })
+
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
-    if (!cleanPreview.title || cleanPreview.ingredients.length === 0 || cleanPreview.preparationSteps.length === 0) {
-      setMessage('Preencha título, pelo menos um ingrediente e pelo menos uma etapa de preparo.')
+    if (!cleanPreview.title || !cleanPreview.description || !cleanPreview.prepTimeMinutes || cleanPreview.ingredients.length === 0 || cleanPreview.preparationSteps.length === 0) {
+      setMessage('Preencha título, descrição, tempo de preparo, pelo menos um ingrediente e pelo menos uma etapa de preparo.')
       return
     }
 
-    setMessage('Receita pronta para integração com o backend.')
+    setIsSubmitting(true)
+    setMessage('')
+
+    try {
+      if (isEdit) await updateRecipeRequest(id, toApiPayload())
+      else await createRecipeRequest(toApiPayload())
+      navigate('/receitas')
+    } catch {
+      setMessage('Não foi possível salvar a receita. Tente novamente.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -54,12 +117,20 @@ export default function RecipeForm({ mode }) {
         </div>
       </div>
 
+      {isLoading && (
+        <div className="empty-state border rounded-3 bg-light p-4 text-center">
+          <div className="spinner-border text-dark" role="status" aria-label="Carregando receita" />
+          <p className="text-secondary mt-3 mb-0">Carregando receita...</p>
+        </div>
+      )}
+
       {message && (
-        <div role="alert" className={`alert ${message.includes('pronta') ? 'alert-success' : 'alert-warning'}`}>
+        <div role="alert" className="alert alert-warning">
           {message}
         </div>
       )}
 
+      {!isLoading && (
       <form className="row g-3" onSubmit={handleSubmit}>
         <div className="col-12 col-lg-8">
           <label className="form-label" htmlFor="title">Título</label>
@@ -143,12 +214,12 @@ export default function RecipeForm({ mode }) {
         </div>
 
         <div className="col-12 d-flex justify-content-end gap-2">
-          <button type="submit" className="btn btn-dark">
-            {isEdit ? 'Salvar alterações' : 'Salvar receita'}
+          <button type="submit" className="btn btn-dark" disabled={isSubmitting}>
+            {isSubmitting ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Salvar receita'}
           </button>
         </div>
       </form>
+      )}
     </div>
   )
 }
-
