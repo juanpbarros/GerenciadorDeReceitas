@@ -41,10 +41,12 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Token JWT salvo no navegador e enviado automaticamente nas requisições autenticadas.
 - Sessão restaurada via `/api/auth/me` quando existe token salvo.
 - Logout remove token e usuário do navegador.
-- Listagem mock de receitas com busca e filtro por categoria.
+- Listagem real de receitas consumindo a API, com busca e filtro por categoria.
+- Cadastro, edição, visualização e exclusão de receitas integrados com a API.
+- Estados de carregamento e mensagens de erro nas telas de receitas.
 - Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
 - Formulários principais criados para receitas, lista de compras, comentários e histórico.
-- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros e formulários principais.
+- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros, formulários e ações de receitas.
 
 ### Backend
 
@@ -57,6 +59,7 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Categorias de receitas definidas por enum no backend.
 - Rota de saúde disponível em `GET /api/health`.
 - Rotas de autenticação disponíveis em `/api/auth`.
+- CRUD de receitas disponível em `/api/recipes`, com ações protegidas por JWT.
 - CRUD de comentários disponível em `/api/comments`.
 - Middleware para rota não encontrada.
 - Middleware central de erro.
@@ -187,6 +190,30 @@ Resposta esperada:
 - `POST /api/auth/login` — autentica usuário e retorna JWT.
 - `GET /api/auth/me` — retorna usuário logado, exigindo token Bearer.
 
+### Receitas
+
+- `GET /api/recipes` — lista receitas, exigindo token Bearer.
+- `GET /api/recipes?busca=bolo` — busca receitas por título ou descrição.
+- `GET /api/recipes?categoria=Sobremesa` — filtra receitas por categoria.
+- `GET /api/recipes/:id` — busca detalhes de uma receita.
+- `POST /api/recipes` — cria receita para o usuário logado.
+- `PATCH /api/recipes/:id` — edita receita do dono logado.
+- `DELETE /api/recipes/:id` — remove receita do dono logado.
+
+Exemplo de receita:
+
+```json
+{
+  "titulo": "Bolo de cenoura",
+  "descricao": "Receita simples para o café da tarde.",
+  "ingredientes": ["2 cenouras", "2 ovos", "1 xícara de açúcar"],
+  "modoPreparo": ["Bata os ingredientes", "Leve ao forno"],
+  "tempoPreparo": 45,
+  "categoria": "Sobremesa",
+  "imagemUrl": ""
+}
+```
+
 ### Comentários
 
 - `GET /api/comments` — lista comentários.
@@ -263,8 +290,6 @@ Workflow:
 
 ## Funcionalidades planejadas
 
-- CRUD real de receitas no backend.
-- Integração do frontend com a API.
 - Favoritos individuais por usuário.
 - Checklist para fazer receita e identificar ingredientes faltantes.
 - Lista de compras gerada a partir dos ingredientes faltantes.
@@ -274,9 +299,9 @@ Workflow:
 
 ## Roadmap incremental
 
-1. Implementar CRUD de receitas com regras de dono e testes.
-2. Integrar receitas e comentários do frontend com a API.
-3. Implementar favoritos, lista de compras e histórico com backend real.
+1. Integrar comentários do frontend com a API.
+2. Implementar favoritos, lista de compras e histórico com backend real.
+3. Integrar favoritos, lista de compras e histórico no frontend.
 4. Preparar deploy do frontend e backend.
 
 ## Observações de regra de negócio
@@ -319,4 +344,10 @@ Para a issue de integração da autenticação do frontend com o backend, use:
 
 ```txt
 Closes #13
+```
+
+Para a issue de integração do CRUD de receitas no frontend, use:
+
+```txt
+Closes #17
 ```
