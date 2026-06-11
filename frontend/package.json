@@ -29,6 +29,7 @@
     "jest": "^30.0.4",
     "jest-environment-jsdom": "^30.0.4",
     "jsdom": "^26.1.0",
+    "postcss": "^8.5.15",
     "vite": "^6.3.0"
   }
 }
