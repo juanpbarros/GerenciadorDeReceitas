@@ -358,3 +358,19 @@ Para a issue de integração dos comentários do frontend com o backend, use:
 ```txt
 Closes #20
 ```
+
+## Atualiza??o ? Hist?rico de receitas feitas
+
+O hist?rico de receitas feitas foi integrado com backend e frontend reais.
+
+- Backend: CRUD protegido por JWT em `/api/recipe-history`.
+- Frontend: p?gina `/historico` lista, cria, edita e exclui registros.
+- Cada registro pertence ao usu?rio logado.
+- Cada registro referencia uma receita e salva data, observa??o opcional e nota pessoal opcional.
+- Testes automatizados cobrem API e integra??o da tela.
+
+Pull Requests relacionados devem usar:
+
+```txt
+Closes #28
+```
