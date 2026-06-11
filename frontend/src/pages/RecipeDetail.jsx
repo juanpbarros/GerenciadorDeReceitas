@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import CommentForm from '../components/CommentForm'
 import CommentList from '../components/CommentList'
+import FavoriteButton from '../components/FavoriteButton'
 import { useAuth } from '../hooks/useAuth'
 import {
   createCommentRequest,
@@ -9,6 +10,11 @@ import {
   listCommentsRequest,
   updateCommentRequest,
 } from '../services/commentApi'
+import {
+  addFavoriteRequest,
+  listFavoritesRequest,
+  removeFavoriteRequest,
+} from '../services/favoriteApi'
 import { deleteRecipeRequest, getRecipeRequest } from '../services/recipeApi'
 
 export default function RecipeDetail() {
@@ -20,8 +26,11 @@ export default function RecipeDetail() {
   const [commentsError, setCommentsError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isLoadingComments, setIsLoadingComments] = useState(false)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState('')
+  const [favoriteError, setFavoriteError] = useState('')
   const [shareMessage, setShareMessage] = useState('')
 
   useEffect(() => {
@@ -32,8 +41,15 @@ export default function RecipeDetail() {
       setError('')
 
       try {
-        const { recipe: apiRecipe } = await getRecipeRequest(id)
-        if (isMounted) setRecipe(apiRecipe)
+        const [{ recipe: apiRecipe }, { favorites }] = await Promise.all([
+          getRecipeRequest(id),
+          listFavoritesRequest(),
+        ])
+
+        if (isMounted) {
+          setRecipe(apiRecipe)
+          setIsFavorite(favorites.some((favorite) => favorite.recipeId === id))
+        }
       } catch {
         if (isMounted) setError('Não foi possível carregar a receita.')
       } finally {
@@ -111,6 +127,25 @@ export default function RecipeDetail() {
     }
   }
 
+  const handleToggleFavorite = async () => {
+    setIsFavoriteLoading(true)
+    setFavoriteError('')
+
+    try {
+      if (isFavorite) {
+        await removeFavoriteRequest(id)
+        setIsFavorite(false)
+      } else {
+        await addFavoriteRequest(id)
+        setIsFavorite(true)
+      }
+    } catch {
+      setFavoriteError('Não foi possível atualizar o favorito.')
+    } finally {
+      setIsFavoriteLoading(false)
+    }
+  }
+
   const handleShare = async () => {
     const recipeUrl = window.location.href
     setShareMessage('')
@@ -164,6 +199,12 @@ export default function RecipeDetail() {
           )}
         </div>
         <div className="d-flex flex-wrap gap-2">
+          <FavoriteButton
+            isFavorite={isFavorite}
+            isLoading={isFavoriteLoading}
+            recipeTitle={recipe.title}
+            onToggle={handleToggleFavorite}
+          />
           <button type="button" className="btn btn-outline-dark" onClick={handleShare}>
             Compartilhar
           </button>
@@ -182,6 +223,12 @@ export default function RecipeDetail() {
           className={`alert ${shareMessage.includes('Não foi possível') ? 'alert-warning' : 'alert-success'} py-2`}
         >
           {shareMessage}
+        </div>
+      )}
+
+      {favoriteError && (
+        <div role="alert" className="alert alert-danger py-2">
+          {favoriteError}
         </div>
       )}
 
