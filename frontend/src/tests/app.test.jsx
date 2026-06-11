@@ -320,6 +320,50 @@ describe('recipe details', () => {
     expect(getRecipeRequest).toHaveBeenCalledWith('bolo-cenoura')
   })
 
+  it('shares a recipe using the Web Share API when available', async () => {
+    const user = userEvent.setup()
+    const share = jest.fn().mockResolvedValue()
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: share,
+    })
+
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /compartilhar/i }))
+
+    expect(share).toHaveBeenCalledWith({
+      title: 'Bolo de cenoura',
+      text: 'Bolo caseiro fofinho.',
+      url: expect.stringContaining('/receitas/bolo-cenoura'),
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/compartilhada com sucesso/i)
+  })
+
+  it('copies recipe link when Web Share API is unavailable', async () => {
+    const user = userEvent.setup()
+    const writeText = jest.fn().mockResolvedValue()
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: undefined,
+    })
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    })
+
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /compartilhar/i }))
+
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('/receitas/bolo-cenoura'))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/link da receita copiado/i)
+  })
+
   it('shows an error when recipe details cannot be loaded', async () => {
     getRecipeRequest.mockRejectedValue(new Error('Falha na API'))
 

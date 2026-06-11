@@ -358,3 +358,18 @@ Para a issue de integração dos comentários do frontend com o backend, use:
 ```txt
 Closes #20
 ```
+
+## Atualiza??o ? Compartilhamento de receitas
+
+A p?gina de detalhes da receita agora permite compartilhar receitas.
+
+- Usa Web Share API quando dispon?vel no navegador.
+- Usa c?pia do link para a ?rea de transfer?ncia como alternativa.
+- Exibe feedback de sucesso ou erro para o usu?rio.
+- Testes automatizados cobrem os dois fluxos.
+
+Pull Requests relacionados devem usar:
+
+```txt
+Closes #31
+```
