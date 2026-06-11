@@ -15,6 +15,12 @@ import {
   listRecipesRequest,
   updateRecipeRequest,
 } from '../services/recipeApi'
+import {
+  createShoppingListRequest,
+  deleteShoppingListRequest,
+  listShoppingListsRequest,
+  updateShoppingListRequest,
+} from '../services/shoppingListApi'
 import { TOKEN_KEY } from '../services/tokenStorage'
 
 jest.mock('../services/authApi', () => ({
@@ -36,6 +42,13 @@ jest.mock('../services/recipeApi', () => ({
   getRecipeRequest: jest.fn(),
   listRecipesRequest: jest.fn(),
   updateRecipeRequest: jest.fn(),
+}))
+
+jest.mock('../services/shoppingListApi', () => ({
+  createShoppingListRequest: jest.fn(),
+  deleteShoppingListRequest: jest.fn(),
+  listShoppingListsRequest: jest.fn(),
+  updateShoppingListRequest: jest.fn(),
 }))
 
 function setRoute(path) {
@@ -81,6 +94,17 @@ const API_RECIPES = [
   },
 ]
 
+const API_SHOPPING_LISTS = [
+  {
+    id: 'shopping-list-1',
+    name: 'Compras do bolo',
+    items: [
+      { id: 'item-1', name: 'farinha', purchased: false },
+      { id: 'item-2', name: 'fermento', purchased: true },
+    ],
+  },
+]
+
 function authenticate(user = AUTH_USER, token = 'jwt-token') {
   localStorage.setItem(TOKEN_KEY, token)
   localStorage.setItem('gr_auth_user', JSON.stringify(user))
@@ -106,6 +130,26 @@ beforeEach(() => {
   getRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   listRecipesRequest.mockResolvedValue({ recipes: API_RECIPES })
   updateRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
+  createShoppingListRequest.mockResolvedValue({
+    shoppingList: {
+      id: 'shopping-list-2',
+      name: 'Compras da semana',
+      items: [{ id: 'item-3', name: 'leite', purchased: false }],
+    },
+  })
+  deleteShoppingListRequest.mockResolvedValue()
+  listShoppingListsRequest.mockResolvedValue({ shoppingLists: API_SHOPPING_LISTS })
+  updateShoppingListRequest.mockImplementation((id, shoppingList) => Promise.resolve({
+    shoppingList: {
+      id,
+      name: shoppingList.name,
+      items: shoppingList.items.map((item, index) => ({
+        id: item.id || `updated-item-${index}`,
+        name: item.name,
+        purchased: item.purchased,
+      })),
+    },
+  }))
   updateCommentRequest.mockResolvedValue({
     comment: {
       id: 'comment-own',
@@ -448,6 +492,26 @@ describe('shopping list form', () => {
     authenticate()
   })
 
+  it('loads shopping lists from the API', async () => {
+    setRoute('/lista-compras')
+    render(<App />)
+
+    expect(screen.getByLabelText(/carregando listas de compras/i)).toBeInTheDocument()
+    expect(await screen.findByText(/Compras do bolo/i)).toBeInTheDocument()
+    expect(screen.getByText(/farinha/i)).toBeInTheDocument()
+    expect(screen.getByText(/1 de 2 itens comprados/i)).toBeInTheDocument()
+    expect(listShoppingListsRequest).toHaveBeenCalled()
+  })
+
+  it('shows an error when shopping lists cannot be loaded', async () => {
+    listShoppingListsRequest.mockRejectedValue(new Error('Falha na API'))
+
+    setRoute('/lista-compras')
+    render(<App />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar as listas/i)
+  })
+
   it('adds dynamic shopping list items and marks an item as purchased', async () => {
     const user = userEvent.setup()
     setRoute('/lista-compras')
@@ -484,7 +548,64 @@ describe('shopping list form', () => {
     await user.type(screen.getByLabelText(/item de compra 1/i), 'leite')
     await user.click(screen.getByRole('button', { name: /salvar lista/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/lista de compras pronta/i)
+    expect(createShoppingListRequest).toHaveBeenCalledWith({
+      name: 'Compras da semana',
+      items: [{ name: 'leite', purchased: false }],
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/lista de compras salva/i)
+    expect(screen.getByText(/Compras da semana/i)).toBeInTheDocument()
+  })
+
+  it('updates an existing shopping list', async () => {
+    const user = userEvent.setup()
+    setRoute('/lista-compras')
+    render(<App />)
+
+    await screen.findByText(/Compras do bolo/i)
+    await user.click(screen.getByRole('button', { name: /editar/i }))
+    await user.clear(screen.getByLabelText(/nome da lista/i))
+    await user.type(screen.getByLabelText(/nome da lista/i), 'Compras atualizadas')
+    await user.click(screen.getByRole('button', { name: /atualizar lista/i }))
+
+    expect(updateShoppingListRequest).toHaveBeenCalledWith('shopping-list-1', {
+      name: 'Compras atualizadas',
+      items: [
+        { id: 'item-1', name: 'farinha', purchased: false },
+        { id: 'item-2', name: 'fermento', purchased: true },
+      ],
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/lista de compras atualizada/i)
+  })
+
+  it('marks an existing shopping list item as purchased using the API', async () => {
+    const user = userEvent.setup()
+    setRoute('/lista-compras')
+    render(<App />)
+
+    await screen.findByText(/Compras do bolo/i)
+    await user.click(screen.getByRole('checkbox', { name: /marcar farinha como comprado/i }))
+
+    expect(updateShoppingListRequest).toHaveBeenCalledWith('shopping-list-1', {
+      id: 'shopping-list-1',
+      name: 'Compras do bolo',
+      items: [
+        { id: 'item-1', name: 'farinha', purchased: true },
+        { id: 'item-2', name: 'fermento', purchased: true },
+      ],
+    })
+  })
+
+  it('deletes a shopping list using the API', async () => {
+    const user = userEvent.setup()
+    setRoute('/lista-compras')
+    render(<App />)
+
+    await screen.findByText(/Compras do bolo/i)
+    await user.click(screen.getByRole('button', { name: /excluir/i }))
+
+    expect(deleteShoppingListRequest).toHaveBeenCalledWith('shopping-list-1')
+    expect(await screen.findByRole('alert')).toHaveTextContent(/lista de compras excluída/i)
+    expect(screen.queryByText(/Compras do bolo/i)).not.toBeInTheDocument()
   })
 })
 
