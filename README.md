@@ -358,3 +358,19 @@ Para a issue de integração dos comentários do frontend com o backend, use:
 ```txt
 Closes #20
 ```
+
+## Atualiza??o ? Lista de compras
+
+A lista de compras foi integrada com backend e frontend reais.
+
+- Backend: CRUD protegido por JWT em `/api/shopping-lists`.
+- Frontend: p?gina `/lista-compras` lista, cria, edita, exclui e marca itens como comprados.
+- Cada lista pertence ao usu?rio logado.
+- Cada item possui nome e status comprado/n?o comprado.
+- Testes automatizados cobrem API e integra??o da tela.
+
+Pull Requests relacionados devem usar:
+
+```txt
+Closes #27
+```
