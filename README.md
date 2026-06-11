@@ -290,20 +290,24 @@ Workflow:
   - `npm --workspace frontend run build`
   - `npm --workspace backend test`
 
-## Funcionalidades planejadas
+## Funcionalidades conclu?das e pendentes
 
-- Favoritos individuais por usuário.
-- Checklist para fazer receita e identificar ingredientes faltantes.
-- Lista de compras gerada a partir dos ingredientes faltantes.
-- Histórico persistido de receitas feitas.
-- Compartilhamento de receitas por link e Web Share API quando disponível.
+Conclu?das:
+
+- Favoritos individuais por usu?rio.
+- Lista de compras persistida.
+- Hist?rico persistido de receitas feitas.
+- Compartilhamento de receitas por link e Web Share API quando dispon?vel.
+- Fluxo Fazer Receita com checklist de ingredientes e envio de faltantes para lista de compras.
+
+Pendentes:
+
 - Deploy do frontend e backend.
 
 ## Roadmap incremental
 
-1. Implementar favoritos, lista de compras e histórico com backend real.
-2. Integrar favoritos, lista de compras e histórico no frontend.
-3. Preparar deploy do frontend e backend.
+1. Preparar deploy do frontend e backend.
+2. Revisar o sistema completo para apresenta??o.
 
 ## Observações de regra de negócio
 
@@ -355,4 +359,20 @@ Pull Request relacionado:
 
 ```txt
 Closes #29
+```
+
+## Atualiza??o ? Fazer Receita
+
+O fluxo Fazer Receita foi integrado na p?gina de detalhes da receita.
+
+- Usu?rio pode abrir o modo de preparo com o bot?o `Fazer Receita`.
+- Ingredientes aparecem em checklist para marcar o que o usu?rio j? possui.
+- Ingredientes n?o marcados aparecem na se??o `Para comprar`.
+- Ingredientes faltantes podem ser enviados para uma nova lista de compras pela API real.
+- Testes automatizados cobrem checklist e cria??o da lista de compras.
+
+Pull Request relacionado:
+
+```txt
+Closes #30
 ```
