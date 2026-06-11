@@ -22,6 +22,7 @@ export default function RecipeDetail() {
   const [isLoadingComments, setIsLoadingComments] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [error, setError] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
 
   useEffect(() => {
     let isMounted = true
@@ -110,6 +111,28 @@ export default function RecipeDetail() {
     }
   }
 
+  const handleShare = async () => {
+    const recipeUrl = window.location.href
+    setShareMessage('')
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: recipe.title,
+          text: recipe.description,
+          url: recipeUrl,
+        })
+        setShareMessage('Receita compartilhada com sucesso.')
+        return
+      }
+
+      await navigator.clipboard.writeText(recipeUrl)
+      setShareMessage('Link da receita copiado.')
+    } catch {
+      setShareMessage('Não foi possível compartilhar a receita.')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="empty-state border rounded-3 bg-light p-4 text-center">
@@ -140,7 +163,10 @@ export default function RecipeDetail() {
             <p className="text-secondary small mt-2 mb-0">Receita de {recipe.sourceName}</p>
           )}
         </div>
-        <div className="d-flex gap-2">
+        <div className="d-flex flex-wrap gap-2">
+          <button type="button" className="btn btn-outline-dark" onClick={handleShare}>
+            Compartilhar
+          </button>
           <Link to={`/receitas/${id}/editar`} className="btn btn-outline-dark">
             Editar
           </Link>
@@ -149,6 +175,15 @@ export default function RecipeDetail() {
           </button>
         </div>
       </div>
+
+      {shareMessage && (
+        <div
+          role="alert"
+          className={`alert ${shareMessage.includes('Não foi possível') ? 'alert-warning' : 'alert-success'} py-2`}
+        >
+          {shareMessage}
+        </div>
+      )}
 
       <div className="row g-4">
         <section className="col-12 col-lg-5">

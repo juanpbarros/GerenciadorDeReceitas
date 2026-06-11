@@ -359,29 +359,17 @@ Para a issue de integração dos comentários do frontend com o backend, use:
 Closes #20
 ```
 
-## Atualiza??o ? Hist?rico de receitas feitas
+## Atualiza??o ? Compartilhamento de receitas
 
-O hist?rico de receitas feitas foi integrado com backend e frontend reais.
+A p?gina de detalhes da receita agora permite compartilhar receitas.
 
-- Backend: CRUD protegido por JWT em `/api/recipe-history`.
-- Frontend: p?gina `/historico` lista, cria, edita e exclui registros.
-- Cada registro pertence ao usu?rio logado.
-- Cada registro referencia uma receita e salva data, observa??o opcional e nota pessoal opcional.
-- Testes automatizados cobrem API e integra??o da tela.
-
-## Atualiza??o ? Lista de compras
-
-A lista de compras foi integrada com backend e frontend reais.
-
-- Backend: CRUD protegido por JWT em `/api/shopping-lists`.
-- Frontend: p?gina `/lista-compras` lista, cria, edita, exclui e marca itens como comprados.
-- Cada lista pertence ao usu?rio logado.
-- Cada item possui nome e status comprado/n?o comprado.
-- Testes automatizados cobrem API e integra??o da tela.
+- Usa Web Share API quando dispon?vel no navegador.
+- Usa c?pia do link para a ?rea de transfer?ncia como alternativa.
+- Exibe feedback de sucesso ou erro para o usu?rio.
+- Testes automatizados cobrem os dois fluxos.
 
 Pull Requests relacionados devem usar:
 
 ```txt
-Closes #28
-Closes #27
+Closes #31
 ```
