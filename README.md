@@ -291,22 +291,22 @@ Workflow:
   - `npm --workspace backend test`
 
 
-## Prepara??o de deploy
+## Preparacao de deploy
 
 O projeto foi preparado para deploy separado de backend e frontend.
 
 ### Backend
 
-Sugest?o gratuita: Render Web Service.
+Sugestao gratuita: Render Web Service.
 
-Configura??es esperadas:
+Configuracoes esperadas:
 
-- Arquivo de refer?ncia: `render.yaml`.
+- Arquivo de referencia: `render.yaml`.
 - Build command: `npm install`.
 - Start command: `npm --workspace backend start`.
 - Healthcheck: `/api/health`.
 
-Vari?veis de ambiente obrigat?rias no servi?o de backend:
+Variaveis de ambiente obrigatorias no servico de backend:
 
 ```env
 NODE_ENV=production
@@ -318,16 +318,16 @@ ALLOWED_ORIGINS=https://url-do-frontend-publicado
 
 ### Frontend
 
-Sugest?o gratuita: Vercel.
+Sugestao gratuita: Vercel.
 
-Configura??es esperadas:
+Configuracoes esperadas:
 
-- Arquivo de refer?ncia: `vercel.json`.
+- Arquivo de referencia: `vercel.json`.
 - Install command: `npm install`.
 - Build command: `npm --workspace frontend run build`.
 - Output directory: `frontend/dist`.
 
-Vari?vel de ambiente obrigat?ria no servi?o de frontend:
+Variavel de ambiente obrigatoria no servico de frontend:
 
 ```env
 VITE_API_URL=https://url-do-backend-publicado/api
@@ -336,85 +336,84 @@ VITE_API_URL=https://url-do-backend-publicado/api
 ### Ordem recomendada
 
 1. Publicar o backend primeiro.
-2. Copiar a URL p?blica do backend.
+2. Copiar a URL publica do backend.
 3. Configurar `VITE_API_URL` no frontend com a URL do backend + `/api`.
 4. Publicar o frontend.
-5. Copiar a URL p?blica do frontend.
+5. Copiar a URL publica do frontend.
 6. Configurar `ALLOWED_ORIGINS` no backend com a URL do frontend.
 7. Reiniciar o backend e testar cadastro, login e rotas protegidas.
 
-### Cuidados de seguran?a
+### Cuidados de seguranca
 
-- Nunca colocar `MONGODB_URI` ou `JWT_SECRET` diretamente no c?digo.
-- Usar secrets/vari?veis de ambiente do servi?o de deploy.
-- Conferir `git status` antes de commitar altera??es envolvendo deploy.
-- No MongoDB Atlas, liberar apenas os IPs necess?rios quando poss?vel.
-- Se usar `0.0.0.0/0` no Atlas, manter senha forte e considerar restringir depois da apresenta??o.
+- Nunca colocar `MONGODB_URI` ou `JWT_SECRET` diretamente no codigo.
+- Usar secrets/variaveis de ambiente do servico de deploy.
+- Conferir `git status` antes de commitar alteracoes envolvendo deploy.
+- No MongoDB Atlas, liberar apenas os IPs necessarios quando possivel.
+- Se usar `0.0.0.0/0` no Atlas, manter senha forte e considerar restringir depois da apresentacao.
 
-## Funcionalidades conclu?das e pendentes
+## Funcionalidades concluidas e pendentes
 
-Conclu?das:
+Concluidas:
 
-- Favoritos individuais por usu?rio.
+- Favoritos individuais por usuario.
 - Lista de compras persistida.
-- Hist?rico persistido de receitas feitas.
-- Compartilhamento de receitas por link e Web Share API quando dispon?vel.
+- Historico persistido de receitas feitas.
+- Compartilhamento de receitas por link e Web Share API quando disponivel.
 - Fluxo Fazer Receita com checklist de ingredientes e envio de faltantes para lista de compras.
 
 Pendentes:
 
-- Deploy do frontend e backend.
+- Executar deploy nos servicos escolhidos.
 
 ## Roadmap incremental
 
-1. Preparar deploy do frontend e backend.
-2. Revisar o sistema completo para apresenta??o.
+1. Executar deploy nos servicos escolhidos.
+2. Revisar o sistema completo para apresentacao.
 
-## Observações de regra de negócio
+## Observacoes de regra de negocio
 
-- Categorias são pré-definidas e não terão CRUD próprio.
-- Ingredientes não terão CRUD próprio; serão salvos como lista de strings dentro da receita.
-- Modo de preparo também será salvo como lista de strings dentro da receita.
-- Receitas próprias aparecem como parte da biblioteca do usuário.
-- Receitas de outras pessoas adicionadas à biblioteca devem indicar o autor original.
+- Categorias sao pre-definidas e nao terao CRUD proprio.
+- Ingredientes nao terao CRUD proprio; serao salvos como lista de strings dentro da receita.
+- Modo de preparo tambem sera salvo como lista de strings dentro da receita.
+- Receitas proprias aparecem como parte da biblioteca do usuario.
+- Receitas de outras pessoas adicionadas a biblioteca devem indicar o autor original.
 - O nome do autor original aparece apenas quando a receita foi adicionada de outra pessoa.
 
-## Segurança e variáveis de ambiente
+## Seguranca e variaveis de ambiente
 
-- O arquivo `.env` real não deve ser commitado.
-- Credenciais do MongoDB Atlas, `JWT_SECRET` e URLs de produção devem ficar apenas no ambiente local ou no serviço de deploy.
-- O repositório deve manter apenas exemplos seguros, como `.env.example`.
+- O arquivo `.env` real nao deve ser commitado.
+- Credenciais do MongoDB Atlas, `JWT_SECRET` e URLs de producao devem ficar apenas no ambiente local ou no servico de deploy.
+- O repositorio deve manter apenas exemplos seguros, como `.env.example`.
 - Antes de qualquer commit envolvendo backend, banco ou deploy, conferir `git status` para evitar subir segredos.
-- Não use usuário administrador global do Atlas se não for necessário.
-- Use senha forte para o usuário do banco.
-- Senhas de usuários da aplicação são salvas apenas como hash.
-- A API não retorna `passwordHash` nas respostas.
+- Nao use usuario administrador global do Atlas se nao for necessario.
+- Use senha forte para o usuario do banco.
+- Senhas de usuarios da aplicacao sao salvas apenas como hash.
+- A API nao retorna `passwordHash` nas respostas.
 
+## Atualizacao - Compartilhamento de receitas
 
-## Atualiza??o ? Compartilhamento de receitas
+A pagina de detalhes da receita agora permite compartilhar receitas.
 
-A p?gina de detalhes da receita agora permite compartilhar receitas.
-
-- Usa Web Share API quando dispon?vel no navegador.
-- Usa c?pia do link para a ?rea de transfer?ncia como alternativa.
-- Exibe feedback de sucesso ou erro para o usu?rio.
+- Usa Web Share API quando disponivel no navegador.
+- Usa copia do link para a area de transferencia como alternativa.
+- Exibe feedback de sucesso ou erro para o usuario.
 - Testes automatizados cobrem os dois fluxos.
 
-Pull Requests relacionados devem usar:
+Pull Request relacionado:
 
 ```txt
 Closes #31
 ```
 
-## Atualiza????o ? Favoritos de receitas
+## Atualizacao - Favoritos de receitas
 
 Os favoritos foram integrados com backend e frontend reais.
 
 - Backend: favoritos protegidos por JWT em `/api/favorites`.
-- Frontend: bot??o de estrela nas telas de receitas e detalhes.
-- P??gina `/favoritos` lista receitas favoritadas pela API real.
-- Favoritos s??o individuais por usu??rio.
-- Testes automatizados cobrem API e integra????o da tela.
+- Frontend: botao de estrela nas telas de receitas e detalhes.
+- Pagina `/favoritos` lista receitas favoritadas pela API real.
+- Favoritos sao individuais por usuario.
+- Testes automatizados cobrem API e integracao da tela.
 
 Pull Request relacionado:
 
@@ -422,15 +421,15 @@ Pull Request relacionado:
 Closes #29
 ```
 
-## Atualiza??o ? Fazer Receita
+## Atualizacao - Fazer Receita
 
-O fluxo Fazer Receita foi integrado na p?gina de detalhes da receita.
+O fluxo Fazer Receita foi integrado na pagina de detalhes da receita.
 
-- Usu?rio pode abrir o modo de preparo com o bot?o `Fazer Receita`.
-- Ingredientes aparecem em checklist para marcar o que o usu?rio j? possui.
-- Ingredientes n?o marcados aparecem na se??o `Para comprar`.
+- Usuario pode abrir o modo de preparo com o botao `Fazer Receita`.
+- Ingredientes aparecem em checklist para marcar o que o usuario ja possui.
+- Ingredientes nao marcados aparecem na secao `Para comprar`.
 - Ingredientes faltantes podem ser enviados para uma nova lista de compras pela API real.
-- Testes automatizados cobrem checklist e cria??o da lista de compras.
+- Testes automatizados cobrem checklist e criacao da lista de compras.
 
 Pull Request relacionado:
 
@@ -438,19 +437,34 @@ Pull Request relacionado:
 Closes #30
 ```
 
-## Atualiza??o ? Prepara??o de deploy
+## Atualizacao - Preparacao de deploy
 
-O projeto foi preparado para publica??o em servi?os gratuitos.
+O projeto foi preparado para publicacao em servicos gratuitos.
 
 - Backend aceita `ALLOWED_ORIGINS` para liberar o frontend publicado via CORS.
-- `.env.example` documenta as vari?veis necess?rias de produ??o.
+- `.env.example` documenta as variaveis necessarias de producao.
 - `frontend/.env.example` documenta `VITE_API_URL` para apontar para a API publicada.
-- `render.yaml` registra uma configura??o base para backend no Render.
-- `vercel.json` registra uma configura??o base para frontend na Vercel.
-- README documenta ordem recomendada de publica??o e cuidados com secrets.
+- `render.yaml` registra uma configuracao base para backend no Render.
+- `vercel.json` registra uma configuracao base para frontend na Vercel.
+- README documenta ordem recomendada de publicacao e cuidados com secrets.
 
 Pull Request relacionado:
 
 ```txt
 Closes #32
+```
+
+## Atualizacao - Revisao final
+
+Revisao final para apresentacao do trabalho escolar.
+
+- Documentacao revisada para remover textos quebrados na parte final do README.
+- Mensagens de erro de favoritos revisadas.
+- Seguranca de variaveis de ambiente conferida.
+- Testes e build devem passar antes do PR final.
+
+Pull Request relacionado:
+
+```txt
+Closes #33
 ```
