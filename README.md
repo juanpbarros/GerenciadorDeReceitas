@@ -290,6 +290,67 @@ Workflow:
   - `npm --workspace frontend run build`
   - `npm --workspace backend test`
 
+
+## Prepara??o de deploy
+
+O projeto foi preparado para deploy separado de backend e frontend.
+
+### Backend
+
+Sugest?o gratuita: Render Web Service.
+
+Configura??es esperadas:
+
+- Arquivo de refer?ncia: `render.yaml`.
+- Build command: `npm install`.
+- Start command: `npm --workspace backend start`.
+- Healthcheck: `/api/health`.
+
+Vari?veis de ambiente obrigat?rias no servi?o de backend:
+
+```env
+NODE_ENV=production
+PORT=3000
+MONGODB_URI=sua_connection_string_do_mongodb_atlas
+JWT_SECRET=uma_chave_forte_e_secreta
+ALLOWED_ORIGINS=https://url-do-frontend-publicado
+```
+
+### Frontend
+
+Sugest?o gratuita: Vercel.
+
+Configura??es esperadas:
+
+- Arquivo de refer?ncia: `vercel.json`.
+- Install command: `npm install`.
+- Build command: `npm --workspace frontend run build`.
+- Output directory: `frontend/dist`.
+
+Vari?vel de ambiente obrigat?ria no servi?o de frontend:
+
+```env
+VITE_API_URL=https://url-do-backend-publicado/api
+```
+
+### Ordem recomendada
+
+1. Publicar o backend primeiro.
+2. Copiar a URL p?blica do backend.
+3. Configurar `VITE_API_URL` no frontend com a URL do backend + `/api`.
+4. Publicar o frontend.
+5. Copiar a URL p?blica do frontend.
+6. Configurar `ALLOWED_ORIGINS` no backend com a URL do frontend.
+7. Reiniciar o backend e testar cadastro, login e rotas protegidas.
+
+### Cuidados de seguran?a
+
+- Nunca colocar `MONGODB_URI` ou `JWT_SECRET` diretamente no c?digo.
+- Usar secrets/vari?veis de ambiente do servi?o de deploy.
+- Conferir `git status` antes de commitar altera??es envolvendo deploy.
+- No MongoDB Atlas, liberar apenas os IPs necess?rios quando poss?vel.
+- Se usar `0.0.0.0/0` no Atlas, manter senha forte e considerar restringir depois da apresenta??o.
+
 ## Funcionalidades conclu?das e pendentes
 
 Conclu?das:
@@ -375,4 +436,21 @@ Pull Request relacionado:
 
 ```txt
 Closes #30
+```
+
+## Atualiza??o ? Prepara??o de deploy
+
+O projeto foi preparado para publica??o em servi?os gratuitos.
+
+- Backend aceita `ALLOWED_ORIGINS` para liberar o frontend publicado via CORS.
+- `.env.example` documenta as vari?veis necess?rias de produ??o.
+- `frontend/.env.example` documenta `VITE_API_URL` para apontar para a API publicada.
+- `render.yaml` registra uma configura??o base para backend no Render.
+- `vercel.json` registra uma configura??o base para frontend na Vercel.
+- README documenta ordem recomendada de publica??o e cuidados com secrets.
+
+Pull Request relacionado:
+
+```txt
+Closes #32
 ```
