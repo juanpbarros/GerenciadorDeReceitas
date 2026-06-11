@@ -2,7 +2,7 @@ import Favorite from '../models/Favorite.js'
 import Recipe from '../models/Recipe.js'
 
 function sendRecipeNotFound(res) {
-  res.status(404).json({ message: 'Receita nÃ£o encontrada.' })
+  res.status(404).json({ message: 'Receita não encontrada.' })
 }
 
 export async function listFavorites(req, res) {
@@ -52,7 +52,7 @@ export async function removeFavorite(req, res) {
   })
 
   if (!favorite) {
-    res.status(404).json({ message: 'Favorito nÃ£o encontrado.' })
+    res.status(404).json({ message: 'Favorito não encontrado.' })
     return
   }
 

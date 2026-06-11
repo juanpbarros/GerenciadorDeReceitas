@@ -103,7 +103,7 @@ export async function createRecipeHistory(req, res) {
   const recipe = await Recipe.findById(payload.receita)
 
   if (!recipe) {
-    res.status(404).json({ message: 'Receita nao encontrada.' })
+    res.status(404).json({ message: 'Receita não encontrada.' })
     return
   }
 
@@ -145,7 +145,7 @@ export async function updateRecipeHistory(req, res) {
   const recipe = await Recipe.findById(payload.receita)
 
   if (!recipe) {
-    res.status(404).json({ message: 'Receita nao encontrada.' })
+    res.status(404).json({ message: 'Receita não encontrada.' })
     return
   }
 
