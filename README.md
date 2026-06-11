@@ -369,8 +369,19 @@ O hist?rico de receitas feitas foi integrado com backend e frontend reais.
 - Cada registro referencia uma receita e salva data, observa??o opcional e nota pessoal opcional.
 - Testes automatizados cobrem API e integra??o da tela.
 
+## Atualiza??o ? Lista de compras
+
+A lista de compras foi integrada com backend e frontend reais.
+
+- Backend: CRUD protegido por JWT em `/api/shopping-lists`.
+- Frontend: p?gina `/lista-compras` lista, cria, edita, exclui e marca itens como comprados.
+- Cada lista pertence ao usu?rio logado.
+- Cada item possui nome e status comprado/n?o comprado.
+- Testes automatizados cobrem API e integra??o da tela.
+
 Pull Requests relacionados devem usar:
 
 ```txt
 Closes #28
+Closes #27
 ```
