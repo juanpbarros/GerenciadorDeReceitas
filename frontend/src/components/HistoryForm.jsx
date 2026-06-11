@@ -1,6 +1,3 @@
-import { useMemo, useState } from 'react'
-import { MOCK_RECIPES } from '../data/mockRecipes'
-
 const initialForm = {
   recipeId: '',
   date: '',
@@ -8,53 +5,29 @@ const initialForm = {
   personalRating: '',
 }
 
-export default function HistoryForm() {
-  const [form, setForm] = useState(initialForm)
-  const [message, setMessage] = useState('')
+export { initialForm }
 
-  const cleanPreview = useMemo(() => ({
-    recipeId: form.recipeId,
-    date: form.date,
-    observation: form.observation.trim(),
-    personalRating: form.personalRating ? Number(form.personalRating) : null,
-  }), [form])
-
-  const updateField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }))
-    setMessage('')
-  }
-
-  const handleSubmit = (event) => {
-    event.preventDefault()
-
-    if (!cleanPreview.recipeId || !cleanPreview.date) {
-      setMessage('Selecione uma receita e informe a data em que ela foi feita.')
-      return
-    }
-
-    setMessage('Registro de histórico pronto para integração com o backend.')
-  }
-
+export default function HistoryForm({
+  form,
+  isSubmitting,
+  onCancel,
+  onChange,
+  onSubmit,
+  recipes,
+  submitLabel = 'Salvar histórico',
+}) {
   return (
-    <form className="row g-3" onSubmit={handleSubmit}>
-      {message && (
-        <div className="col-12">
-          <div role="alert" className={`alert ${message.includes('pronto') ? 'alert-success' : 'alert-warning'}`}>
-            {message}
-          </div>
-        </div>
-      )}
-
+    <form className="row g-3" onSubmit={onSubmit}>
       <div className="col-12 col-lg-8">
         <label className="form-label" htmlFor="history-recipe">Receita feita</label>
         <select
           id="history-recipe"
           className="form-select"
           value={form.recipeId}
-          onChange={(event) => updateField('recipeId', event.target.value)}
+          onChange={(event) => onChange('recipeId', event.target.value)}
         >
           <option value="">Selecione uma receita</option>
-          {MOCK_RECIPES.map((recipe) => (
+          {recipes.map((recipe) => (
             <option key={recipe.id} value={recipe.id}>{recipe.title}</option>
           ))}
         </select>
@@ -67,7 +40,7 @@ export default function HistoryForm() {
           type="date"
           className="form-control"
           value={form.date}
-          onChange={(event) => updateField('date', event.target.value)}
+          onChange={(event) => onChange('date', event.target.value)}
         />
       </div>
 
@@ -77,7 +50,7 @@ export default function HistoryForm() {
           id="history-rating"
           className="form-select"
           value={form.personalRating}
-          onChange={(event) => updateField('personalRating', event.target.value)}
+          onChange={(event) => onChange('personalRating', event.target.value)}
         >
           <option value="">Sem nota</option>
           <option value="1">1 - Não faria novamente</option>
@@ -95,14 +68,19 @@ export default function HistoryForm() {
           className="form-control"
           rows="3"
           value={form.observation}
-          onChange={(event) => updateField('observation', event.target.value)}
+          onChange={(event) => onChange('observation', event.target.value)}
           placeholder="Ex: Fiz metade da receita e funcionou bem."
         />
       </div>
 
-      <div className="col-12 d-flex justify-content-end">
-        <button type="submit" className="btn btn-dark">
-          Salvar histórico
+      <div className="col-12 d-flex flex-wrap gap-2 justify-content-end">
+        {onCancel && (
+          <button type="button" className="btn btn-outline-secondary" onClick={onCancel}>
+            Cancelar edição
+          </button>
+        )}
+        <button type="submit" className="btn btn-dark" disabled={isSubmitting}>
+          {isSubmitting ? 'Salvando...' : submitLabel}
         </button>
       </div>
     </form>

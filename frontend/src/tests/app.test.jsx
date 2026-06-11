@@ -9,6 +9,12 @@ import {
   updateCommentRequest,
 } from '../services/commentApi'
 import {
+  createRecipeHistoryRequest,
+  deleteRecipeHistoryRequest,
+  listRecipeHistoryRequest,
+  updateRecipeHistoryRequest,
+} from '../services/recipeHistoryApi'
+import {
   createRecipeRequest,
   deleteRecipeRequest,
   getRecipeRequest,
@@ -34,6 +40,13 @@ jest.mock('../services/commentApi', () => ({
   deleteCommentRequest: jest.fn(),
   listCommentsRequest: jest.fn(),
   updateCommentRequest: jest.fn(),
+}))
+
+jest.mock('../services/recipeHistoryApi', () => ({
+  createRecipeHistoryRequest: jest.fn(),
+  deleteRecipeHistoryRequest: jest.fn(),
+  listRecipeHistoryRequest: jest.fn(),
+  updateRecipeHistoryRequest: jest.fn(),
 }))
 
 jest.mock('../services/recipeApi', () => ({
@@ -94,6 +107,18 @@ const API_RECIPES = [
   },
 ]
 
+const API_HISTORY = [
+  {
+    id: 'history-1',
+    recipeId: 'bolo-cenoura',
+    recipeTitle: 'Bolo de cenoura',
+    recipeCategory: 'Sobremesa',
+    date: '2026-06-10T00:00:00.000Z',
+    observation: 'Ficou ?timo para o caf?.',
+    personalRating: 5,
+  },
+]
+
 const API_SHOPPING_LISTS = [
   {
     id: 'shopping-list-1',
@@ -125,6 +150,28 @@ beforeEach(() => {
   })
   deleteCommentRequest.mockResolvedValue()
   listCommentsRequest.mockResolvedValue({ comments: API_COMMENTS })
+  createRecipeHistoryRequest.mockResolvedValue({
+    historyRecord: {
+      id: 'history-2',
+      recipeId: 'bolo-cenoura',
+      recipeTitle: 'Bolo de cenoura',
+      date: '2026-05-31T00:00:00.000Z',
+      observation: 'Ficou ótimo para o café.',
+      personalRating: 5,
+    },
+  })
+  deleteRecipeHistoryRequest.mockResolvedValue()
+  listRecipeHistoryRequest.mockResolvedValue({ history: API_HISTORY })
+  updateRecipeHistoryRequest.mockImplementation((id, historyRecord) => Promise.resolve({
+    historyRecord: {
+      id,
+      recipeId: historyRecord.recipeId,
+      recipeTitle: 'Bolo de cenoura',
+      date: `${historyRecord.date}T00:00:00.000Z`,
+      observation: historyRecord.observation,
+      personalRating: historyRecord.personalRating,
+    },
+  }))
   createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   deleteRecipeRequest.mockResolvedValue()
   getRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
@@ -751,12 +798,32 @@ describe('history form', () => {
     authenticate()
   })
 
+  it('loads recipe history from the API', async () => {
+    setRoute('/historico')
+    render(<App />)
+
+    expect(await screen.findAllByText(/Bolo de cenoura/i)).toHaveLength(2)
+    expect(screen.getByText(/Ficou .timo para o caf/i)).toBeInTheDocument()
+    expect(screen.getByText(/Nota 5\/5/i)).toBeInTheDocument()
+    expect(listRecipeHistoryRequest).toHaveBeenCalled()
+    expect(listRecipesRequest).toHaveBeenCalled()
+  })
+
+  it('shows an error when recipe history cannot be loaded', async () => {
+    listRecipeHistoryRequest.mockRejectedValue(new Error('Falha na API'))
+
+    setRoute('/historico')
+    render(<App />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/carregar o hist/i)
+  })
+
   it('shows validation message when history form is incomplete', async () => {
     const user = userEvent.setup()
     setRoute('/historico')
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: /salvar histórico/i }))
+    await user.click(screen.getByRole('button', { name: /salvar hist/i }))
 
     expect(screen.getByRole('alert')).toHaveTextContent(/selecione uma receita/i)
   })
@@ -766,14 +833,52 @@ describe('history form', () => {
     setRoute('/historico')
     render(<App />)
 
+    await screen.findAllByText(/Bolo de cenoura/i)
     await user.selectOptions(screen.getByLabelText(/receita feita/i), 'bolo-cenoura')
     await user.type(screen.getByLabelText(/^data$/i), '2026-05-31')
     await user.selectOptions(screen.getByLabelText(/nota pessoal opcional/i), '5')
-    await user.type(screen.getByLabelText(/observação opcional/i), 'Ficou ótimo para o café.')
-    await user.click(screen.getByRole('button', { name: /salvar histórico/i }))
+    await user.type(screen.getByLabelText(/observa/i), 'Ficou otimo para o cafe.')
+    await user.click(screen.getByRole('button', { name: /salvar hist/i }))
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/registro de histórico pronto/i)
+    expect(createRecipeHistoryRequest).toHaveBeenCalledWith({
+      recipeId: 'bolo-cenoura',
+      date: '2026-05-31',
+      observation: 'Ficou otimo para o cafe.',
+      personalRating: 5,
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/registro de hist/i)
+  })
+
+  it('updates a history record using the API', async () => {
+    const user = userEvent.setup()
+    setRoute('/historico')
+    render(<App />)
+
+    await screen.findByText(/Ficou .timo para o caf/i)
+    await user.click(screen.getByRole('button', { name: /editar/i }))
+    await user.clear(screen.getByLabelText(/observa/i))
+    await user.type(screen.getByLabelText(/observa/i), 'Ficou melhor ainda.')
+    await user.click(screen.getByRole('button', { name: /atualizar hist/i }))
+
+    expect(updateRecipeHistoryRequest).toHaveBeenCalledWith('history-1', {
+      recipeId: 'bolo-cenoura',
+      date: '2026-06-10',
+      observation: 'Ficou melhor ainda.',
+      personalRating: 5,
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/registro de hist/i)
+  })
+
+  it('deletes a history record using the API', async () => {
+    const user = userEvent.setup()
+    setRoute('/historico')
+    render(<App />)
+
+    await screen.findByText(/Ficou .timo para o caf/i)
+    await user.click(screen.getByRole('button', { name: /excluir/i }))
+
+    expect(deleteRecipeHistoryRequest).toHaveBeenCalledWith('history-1')
+    expect(await screen.findByRole('alert')).toHaveTextContent(/registro de hist/i)
+    expect(screen.queryByText(/Ficou .timo para o caf/i)).not.toBeInTheDocument()
   })
 })
-
-
