@@ -325,39 +325,6 @@ Workflow:
 - Senhas de usuários da aplicação são salvas apenas como hash.
 - A API não retorna `passwordHash` nas respostas.
 
-## Controle de versão
-
-O projeto está sendo desenvolvido com commits pequenos e organizados.
-
-Cada Pull Request deve informar as issues relacionadas usando:
-
-```txt
-Closes #numero-da-issue
-```
-
-Para a issue de autenticação backend, use:
-
-```txt
-Closes #12
-```
-
-Para a issue de integração da autenticação do frontend com o backend, use:
-
-```txt
-Closes #13
-```
-
-Para a issue de integração do CRUD de receitas no frontend, use:
-
-```txt
-Closes #17
-```
-
-Para a issue de integração dos comentários do frontend com o backend, use:
-
-```txt
-Closes #20
-```
 
 ## Atualiza??o ? Compartilhamento de receitas
 
@@ -372,4 +339,20 @@ Pull Requests relacionados devem usar:
 
 ```txt
 Closes #31
+```
+
+## Atualiza????o ? Favoritos de receitas
+
+Os favoritos foram integrados com backend e frontend reais.
+
+- Backend: favoritos protegidos por JWT em `/api/favorites`.
+- Frontend: bot??o de estrela nas telas de receitas e detalhes.
+- P??gina `/favoritos` lista receitas favoritadas pela API real.
+- Favoritos s??o individuais por usu??rio.
+- Testes automatizados cobrem API e integra????o da tela.
+
+Pull Request relacionado:
+
+```txt
+Closes #29
 ```

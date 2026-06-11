@@ -15,6 +15,11 @@ import {
   updateRecipeHistoryRequest,
 } from '../services/recipeHistoryApi'
 import {
+  addFavoriteRequest,
+  listFavoritesRequest,
+  removeFavoriteRequest,
+} from '../services/favoriteApi'
+import {
   createRecipeRequest,
   deleteRecipeRequest,
   getRecipeRequest,
@@ -47,6 +52,12 @@ jest.mock('../services/recipeHistoryApi', () => ({
   deleteRecipeHistoryRequest: jest.fn(),
   listRecipeHistoryRequest: jest.fn(),
   updateRecipeHistoryRequest: jest.fn(),
+}))
+
+jest.mock('../services/favoriteApi', () => ({
+  addFavoriteRequest: jest.fn(),
+  listFavoritesRequest: jest.fn(),
+  removeFavoriteRequest: jest.fn(),
 }))
 
 jest.mock('../services/recipeApi', () => ({
@@ -130,6 +141,14 @@ const API_SHOPPING_LISTS = [
   },
 ]
 
+const API_FAVORITES = [
+  {
+    id: 'favorite-1',
+    recipeId: 'bolo-cenoura',
+    recipe: API_RECIPES[0],
+  },
+]
+
 function authenticate(user = AUTH_USER, token = 'jwt-token') {
   localStorage.setItem(TOKEN_KEY, token)
   localStorage.setItem('gr_auth_user', JSON.stringify(user))
@@ -174,8 +193,11 @@ beforeEach(() => {
   }))
   createRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   deleteRecipeRequest.mockResolvedValue()
+  addFavoriteRequest.mockResolvedValue({ favorite: API_FAVORITES[0] })
   getRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
+  listFavoritesRequest.mockResolvedValue({ favorites: API_FAVORITES })
   listRecipesRequest.mockResolvedValue({ recipes: API_RECIPES })
+  removeFavoriteRequest.mockResolvedValue()
   updateRecipeRequest.mockResolvedValue({ recipe: API_RECIPES[0] })
   createShoppingListRequest.mockResolvedValue({
     shoppingList: {
@@ -361,6 +383,26 @@ describe('recipes listing', () => {
     expect(screen.getByRole('link', { name: /Macarrão alho e óleo/i })).toBeInTheDocument()
     expect(screen.getByText(/2 receitas encontradas/i)).toBeInTheDocument()
     expect(listRecipesRequest).toHaveBeenCalledWith({ busca: '', categoria: '' })
+    expect(listFavoritesRequest).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: /remover dos favoritos bolo de cenoura/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /favoritar macarr/i })).toBeInTheDocument()
+  })
+
+  it('favorites and removes recipes from the listing', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas')
+    render(<App />)
+
+    await screen.findByRole('link', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /favoritar macarr/i }))
+
+    expect(addFavoriteRequest).toHaveBeenCalledWith('macarrao-alho-oleo')
+    expect(await screen.findByRole('button', { name: /remover dos favoritos macarr/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /remover dos favoritos bolo de cenoura/i }))
+
+    expect(removeFavoriteRequest).toHaveBeenCalledWith('bolo-cenoura')
+    expect(await screen.findByRole('button', { name: /favoritar bolo de cenoura/i })).toBeInTheDocument()
   })
 
   it('shows an error when recipes cannot be loaded', async () => {
@@ -395,6 +437,35 @@ describe('recipes listing', () => {
   })
 })
 
+
+describe('favorites page', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    authenticate()
+  })
+
+  it('lists favorite recipes from the API', async () => {
+    setRoute('/favoritos')
+    render(<App />)
+
+    expect(screen.getByLabelText(/carregando favoritos/i)).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /Bolo de cenoura/i })).toBeInTheDocument()
+    expect(listFavoritesRequest).toHaveBeenCalled()
+  })
+
+  it('removes a favorite from the favorites page', async () => {
+    const user = userEvent.setup()
+    setRoute('/favoritos')
+    render(<App />)
+
+    await screen.findByRole('link', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /remover dos favoritos bolo de cenoura/i }))
+
+    expect(removeFavoriteRequest).toHaveBeenCalledWith('bolo-cenoura')
+    expect(await screen.findByText(/nenhum favorito ainda/i)).toBeInTheDocument()
+  })
+})
+
 describe('recipe details', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -409,6 +480,18 @@ describe('recipe details', () => {
     expect(await screen.findByRole('heading', { name: /Bolo de cenoura/i })).toBeInTheDocument()
     expect(screen.getByText(/2 cenouras/i)).toBeInTheDocument()
     expect(getRecipeRequest).toHaveBeenCalledWith('bolo-cenoura')
+  })
+
+  it('toggles favorite status from recipe details', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /remover dos favoritos bolo de cenoura/i }))
+
+    expect(removeFavoriteRequest).toHaveBeenCalledWith('bolo-cenoura')
+    expect(await screen.findByRole('button', { name: /favoritar bolo de cenoura/i })).toBeInTheDocument()
   })
 
   it('shares a recipe using the Web Share API when available', async () => {

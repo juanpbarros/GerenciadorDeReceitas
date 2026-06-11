@@ -4,12 +4,19 @@ import FilterBar from '../components/FilterBar'
 import RecipeCard from '../components/RecipeCard'
 import SearchBar from '../components/SearchBar'
 import { RECIPE_CATEGORIES } from '../data/mockRecipes'
+import {
+  addFavoriteRequest,
+  listFavoritesRequest,
+  removeFavoriteRequest,
+} from '../services/favoriteApi'
 import { listRecipesRequest } from '../services/recipeApi'
 
 export default function Recipes() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [recipes, setRecipes] = useState([])
+  const [favoriteIds, setFavoriteIds] = useState([])
+  const [favoriteLoadingId, setFavoriteLoadingId] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -21,12 +28,18 @@ export default function Recipes() {
       setError('')
 
       try {
-        const { recipes: apiRecipes } = await listRecipesRequest({
-          busca: search.trim(),
-          categoria: category,
-        })
+        const [{ recipes: apiRecipes }, { favorites }] = await Promise.all([
+          listRecipesRequest({
+            busca: search.trim(),
+            categoria: category,
+          }),
+          listFavoritesRequest(),
+        ])
 
-        if (isMounted) setRecipes(apiRecipes)
+        if (isMounted) {
+          setRecipes(apiRecipes)
+          setFavoriteIds(favorites.map((favorite) => favorite.recipeId))
+        }
       } catch {
         if (isMounted) setError('Não foi possível carregar as receitas.')
       } finally {
@@ -40,6 +53,27 @@ export default function Recipes() {
       isMounted = false
     }
   }, [category, search])
+
+  const handleToggleFavorite = async (recipe) => {
+    const isFavorite = favoriteIds.includes(recipe.id)
+
+    setFavoriteLoadingId(recipe.id)
+    setError('')
+
+    try {
+      if (isFavorite) {
+        await removeFavoriteRequest(recipe.id)
+        setFavoriteIds((currentIds) => currentIds.filter((id) => id !== recipe.id))
+      } else {
+        await addFavoriteRequest(recipe.id)
+        setFavoriteIds((currentIds) => [...new Set([...currentIds, recipe.id])])
+      }
+    } catch {
+      setError('Não foi possível atualizar o favorito.')
+    } finally {
+      setFavoriteLoadingId('')
+    }
+  }
 
   return (
     <div>
@@ -87,7 +121,12 @@ export default function Recipes() {
         <div className="row g-3" aria-label="Lista de receitas">
           {recipes.map((recipe) => (
             <div className="col-12 col-md-6 col-xl-4" key={recipe.id}>
-              <RecipeCard recipe={recipe} />
+              <RecipeCard
+                recipe={recipe}
+                isFavorite={favoriteIds.includes(recipe.id)}
+                isFavoriteLoading={favoriteLoadingId === recipe.id}
+                onToggleFavorite={() => handleToggleFavorite(recipe)}
+              />
             </div>
           ))}
         </div>
@@ -100,4 +139,3 @@ export default function Recipes() {
     </div>
   )
 }
-
