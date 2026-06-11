@@ -16,6 +16,7 @@ import {
   removeFavoriteRequest,
 } from '../services/favoriteApi'
 import { deleteRecipeRequest, getRecipeRequest } from '../services/recipeApi'
+import { createShoppingListRequest } from '../services/shoppingListApi'
 
 export default function RecipeDetail() {
   const { id } = useParams()
@@ -32,6 +33,14 @@ export default function RecipeDetail() {
   const [error, setError] = useState('')
   const [favoriteError, setFavoriteError] = useState('')
   const [shareMessage, setShareMessage] = useState('')
+  const [isCookingMode, setIsCookingMode] = useState(false)
+  const [ownedIngredients, setOwnedIngredients] = useState([])
+  const [shoppingListMessage, setShoppingListMessage] = useState('')
+  const [isSavingMissingItems, setIsSavingMissingItems] = useState(false)
+
+  const missingIngredients = recipe
+    ? recipe.ingredients.filter((ingredient) => !ownedIngredients.includes(ingredient))
+    : []
 
   useEffect(() => {
     let isMounted = true
@@ -168,6 +177,39 @@ export default function RecipeDetail() {
     }
   }
 
+  const handleToggleCookingMode = () => {
+    setIsCookingMode((currentValue) => !currentValue)
+    setShoppingListMessage('')
+  }
+
+  const handleToggleIngredient = (ingredient) => {
+    setOwnedIngredients((currentIngredients) => (
+      currentIngredients.includes(ingredient)
+        ? currentIngredients.filter((item) => item !== ingredient)
+        : [...currentIngredients, ingredient]
+    ))
+  }
+
+  const handleAddMissingToShoppingList = async () => {
+    setIsSavingMissingItems(true)
+    setShoppingListMessage('')
+
+    try {
+      await createShoppingListRequest({
+        name: `Compras - ${recipe.title}`,
+        items: missingIngredients.map((ingredient) => ({
+          name: ingredient,
+          purchased: false,
+        })),
+      })
+      setShoppingListMessage('Ingredientes faltantes adicionados à lista de compras.')
+    } catch {
+      setShoppingListMessage('Não foi possível adicionar os ingredientes à lista de compras.')
+    } finally {
+      setIsSavingMissingItems(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="empty-state border rounded-3 bg-light p-4 text-center">
@@ -208,6 +250,9 @@ export default function RecipeDetail() {
           <button type="button" className="btn btn-outline-dark" onClick={handleShare}>
             Compartilhar
           </button>
+          <button type="button" className="btn btn-dark" onClick={handleToggleCookingMode}>
+            {isCookingMode ? 'Fechar preparo' : 'Fazer Receita'}
+          </button>
           <Link to={`/receitas/${id}/editar`} className="btn btn-outline-dark">
             Editar
           </Link>
@@ -230,6 +275,66 @@ export default function RecipeDetail() {
         <div role="alert" className="alert alert-danger py-2">
           {favoriteError}
         </div>
+      )}
+
+      {shoppingListMessage && (
+        <div
+          role="alert"
+          className={`alert ${shoppingListMessage.includes('Não foi possível') ? 'alert-danger' : 'alert-success'} py-2`}
+        >
+          {shoppingListMessage}
+        </div>
+      )}
+
+      {isCookingMode && (
+        <section className="mb-4 p-3 border rounded-3 bg-light">
+          <div className="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+            <div>
+              <h3 className="h5 mb-1">Fazer Receita</h3>
+              <p className="text-secondary mb-0">Marque os ingredientes que você já possui.</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-outline-dark align-self-start"
+              onClick={handleAddMissingToShoppingList}
+              disabled={missingIngredients.length === 0 || isSavingMissingItems}
+            >
+              {isSavingMissingItems ? 'Adicionando...' : 'Adicionar faltantes à lista de compras'}
+            </button>
+          </div>
+
+          <div className="row g-3">
+            <div className="col-12 col-lg-6">
+              <h4 className="h6">Checklist de ingredientes</h4>
+              <div className="list-group">
+                {recipe.ingredients.map((ingredient) => (
+                  <label className="list-group-item d-flex align-items-center gap-2" key={ingredient}>
+                    <input
+                      type="checkbox"
+                      className="form-check-input m-0"
+                      checked={ownedIngredients.includes(ingredient)}
+                      onChange={() => handleToggleIngredient(ingredient)}
+                    />
+                    <span>{ingredient}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="col-12 col-lg-6">
+              <h4 className="h6">Para comprar</h4>
+              {missingIngredients.length > 0 ? (
+                <ul className="list-group">
+                  {missingIngredients.map((ingredient) => (
+                    <li className="list-group-item" key={ingredient}>{ingredient}</li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="alert alert-success mb-0">Você já possui todos os ingredientes.</div>
+              )}
+            </div>
+          </div>
+        </section>
       )}
 
       <div className="row g-4">

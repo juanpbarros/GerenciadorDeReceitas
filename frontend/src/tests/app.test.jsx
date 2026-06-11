@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../App'
 import { getCurrentUserRequest, loginRequest, registerRequest } from '../services/authApi'
@@ -492,6 +492,48 @@ describe('recipe details', () => {
 
     expect(removeFavoriteRequest).toHaveBeenCalledWith('bolo-cenoura')
     expect(await screen.findByRole('button', { name: /favoritar bolo de cenoura/i })).toBeInTheDocument()
+  })
+
+  it('shows missing ingredients while making a recipe', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /fazer receita/i }))
+
+    expect(screen.getByRole('heading', { name: /fazer receita/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /para comprar/i })).toBeInTheDocument()
+    const shoppingColumn = screen.getByRole('heading', { name: /para comprar/i }).closest('div')
+    expect(within(shoppingColumn).getByText(/2 cenouras/i)).toBeInTheDocument()
+    expect(within(shoppingColumn).getByText(/2 ovos/i)).toBeInTheDocument()
+
+    await user.click(screen.getByLabelText(/2 cenouras/i))
+
+    expect(within(shoppingColumn).queryByText(/2 cenouras/i)).not.toBeInTheDocument()
+    expect(within(shoppingColumn).getByText(/2 ovos/i)).toBeInTheDocument()
+  })
+
+  it('adds missing ingredients to the shopping list', async () => {
+    const user = userEvent.setup()
+    setRoute('/receitas/bolo-cenoura')
+    render(<App />)
+
+    await screen.findByRole('heading', { name: /Bolo de cenoura/i })
+    await user.click(screen.getByRole('button', { name: /fazer receita/i }))
+    await user.click(screen.getByLabelText(/2 cenouras/i))
+    await user.click(screen.getByRole('button', { name: /adicionar faltantes/i }))
+
+    expect(createShoppingListRequest).toHaveBeenCalledWith({
+      name: 'Compras - Bolo de cenoura',
+      items: [
+        {
+          name: '2 ovos',
+          purchased: false,
+        },
+      ],
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/ingredientes faltantes adicionados/i)
   })
 
   it('shares a recipe using the Web Share API when available', async () => {
