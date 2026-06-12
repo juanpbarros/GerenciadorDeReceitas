@@ -468,3 +468,12 @@ Pull Request relacionado:
 ```txt
 Closes #33
 ```
+
+## Atualizacao - Mensagens de autenticacao
+
+As telas de login e cadastro agora exibem mensagens de erro retornadas pela API.
+
+- Login mostra mensagens como `Credenciais invalidas.` quando a API retorna esse erro.
+- Cadastro mostra mensagens como `Email ja cadastrado.` quando o email informado ja existe.
+- As telas mantem mensagens genericas como fallback para erros inesperados.
+- Testes do frontend cobrem as mensagens reais da API nas telas de autenticacao.
