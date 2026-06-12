@@ -1,0 +1,13 @@
+export function getErrorMessage(error, fallbackMessage) {
+  const apiMessage = error?.response?.data?.message
+
+  if (typeof apiMessage === 'string' && apiMessage.trim()) {
+    return apiMessage
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  return fallbackMessage
+}

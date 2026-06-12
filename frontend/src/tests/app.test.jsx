@@ -311,7 +311,11 @@ describe('routing/auth', () => {
 
   it('shows an error and keeps session empty when login fails', async () => {
     const user = userEvent.setup()
-    loginRequest.mockRejectedValue(new Error('Credenciais inválidas'))
+    loginRequest.mockRejectedValue({
+      response: {
+        data: { message: 'Credenciais inválidas.' },
+      },
+    })
 
     setRoute('/login')
     render(<App />)
@@ -320,7 +324,7 @@ describe('routing/auth', () => {
     await user.type(screen.getByLabelText(/senha/i), 'senha-errada')
     await user.click(screen.getByRole('button', { name: /entrar/i }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível entrar/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/credenciais inválidas/i)
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
     expect(localStorage.getItem('gr_auth_user')).toBeNull()
   })
@@ -351,7 +355,11 @@ describe('routing/auth', () => {
 
   it('shows an error and keeps session empty when registration fails', async () => {
     const user = userEvent.setup()
-    registerRequest.mockRejectedValue(new Error('Email já cadastrado'))
+    registerRequest.mockRejectedValue({
+      response: {
+        data: { message: 'Email já cadastrado.' },
+      },
+    })
 
     setRoute('/register')
     render(<App />)
@@ -361,7 +369,7 @@ describe('routing/auth', () => {
     await user.type(screen.getByLabelText(/senha/i), '123456')
     await user.click(screen.getByRole('button', { name: /cadastrar/i }))
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível cadastrar/i)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/email já cadastrado/i)
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
     expect(localStorage.getItem('gr_auth_user')).toBeNull()
   })
