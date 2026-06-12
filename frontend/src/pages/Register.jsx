@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { getErrorMessage } from '../utils/getErrorMessage'
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -16,8 +17,8 @@ export default function Register() {
     try {
       await register(name, email, password)
       navigate('/')
-    } catch {
-      setError('Não foi possível cadastrar. Tente novamente.')
+    } catch (error) {
+      setError(getErrorMessage(error, 'Não foi possível cadastrar. Tente novamente.'))
     }
   }
 
@@ -83,4 +84,3 @@ export default function Register() {
     </div>
   )
 }
-
