@@ -1,94 +1,102 @@
-# Sistema Web de Receitas (Trabalho Escolar)
+# Sistema Web de Receitas
 
-Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequenas, com **testes automatizados** criados e executados junto de cada funcionalidade.
+Sistema web de receitas desenvolvido para trabalho escolar, com frontend em React, backend em Node.js/Express e banco de dados MongoDB Atlas.
 
-## Stack do projeto
+O projeto permite que usuários criem receitas, comentem, favoritem, montem listas de compras e registrem receitas já feitas.
 
-- Frontend: React + Vite
-- UI: Bootstrap + CSS
-- Backend: Node.js + Express
-- Banco de dados: MongoDB Atlas com Mongoose
-- Autenticação: JWT + Argon2
-- Testes:
-  - Frontend: Jest + React Testing Library
-  - Backend: Jest + Supertest
-- CI/CD: GitHub Actions, Vercel e Render
+## Links do projeto
 
-## Estrutura do repositório
+- Frontend: https://gerenciador-de-receitas-frontend.vercel.app
+- Backend: https://gerenciadordereceitas.onrender.com
+- Healthcheck da API: https://gerenciadordereceitas.onrender.com/api/health
 
-- `frontend/` — aplicação React com Vite
-- `backend/` — API Node.js com Express
-- `backend/src/config/` — configurações do backend, incluindo conexão com banco
-- `backend/src/controllers/` — controllers da API
-- `backend/src/middlewares/` — middlewares de erro e autenticação
-- `backend/src/models/` — models do Mongoose
-- `backend/src/routes/` — rotas da API
-- `backend/src/services/` — serviços auxiliares, como autenticação
-- `.github/workflows/` — workflows de integração contínua
-- `.env.example` — modelo de variáveis de ambiente
-- `README.md` — documentação do projeto
+> Observação: o backend está no plano gratuito do Render. No primeiro acesso, ele pode demorar alguns segundos para responder.
 
-## Status atual
+## Tecnologias utilizadas
 
 ### Frontend
 
-- Layout autenticado com Topbar e Sidebar.
-- Sidebar conectada ao canto da tela, usando Bootstrap + CSS.
-- Rotas públicas para login e cadastro.
-- Rotas protegidas para dashboard, receitas, favoritos, lista de compras, histórico e perfil.
-- Autenticação real integrada com a API do backend.
-- Login e cadastro consomem `/api/auth/login` e `/api/auth/register`.
-- Token JWT salvo no navegador e enviado automaticamente nas requisições autenticadas.
-- Sessão restaurada via `/api/auth/me` quando existe token salvo.
-- Logout remove token e usuário do navegador.
-- Listagem real de receitas consumindo a API, com busca e filtro por categoria.
-- Cadastro, edição, visualização e exclusão de receitas integrados com a API.
-- Estados de carregamento e mensagens de erro nas telas de receitas.
-- Biblioteca pessoal de receitas, separando receitas próprias e receitas adicionadas de outros usuários.
-- Formulários principais criados para receitas, lista de compras, comentários e histórico.
-- Comentários da página de detalhes integrados com a API real.
-- Usuário autenticado pode criar, editar e excluir seus próprios comentários.
-- Testes automatizados para autenticação real, rotas protegidas, listagem, filtros, formulários, ações de receitas e comentários integrados.
+- React
+- Vite
+- React Router
+- Bootstrap + CSS
+- Axios
+- Jest
+- React Testing Library
 
 ### Backend
 
-- API Express configurada.
-- Conexão com MongoDB Atlas via `MONGODB_URI`.
-- Autenticação com cadastro, login, JWT e middleware de rota protegida.
-- Senhas armazenadas com hash usando Argon2.
-- Model base de receitas criado com ingredientes e modo de preparo como listas de strings.
-- Model base de comentários criado com relação para usuário e receita.
-- Categorias de receitas definidas por enum no backend.
-- Rota de saúde disponível em `GET /api/health`.
-- Rotas de autenticação disponíveis em `/api/auth`.
-- CRUD de receitas disponível em `/api/recipes`, com ações protegidas por JWT.
-- CRUD de comentários disponível em `/api/comments`.
-- Middleware para rota não encontrada.
-- Middleware central de erro.
-- Testes automatizados com Jest + Supertest, incluindo validações dos models base e rotas de comentários.
+- Node.js
+- Express
+- MongoDB Atlas
+- Mongoose
+- JWT
+- Argon2
+- Jest
+- Supertest
 
-### Integração contínua e deploy contínuo
+### Deploy e integração
 
-- Workflow de CI/CD configurado em `.github/workflows/ci.yml`.
-- A pipeline roda automaticamente em Pull Requests para `main`.
-- A pipeline também roda em pushes para `main`.
-- O workflow usa Node.js 24 e actions atuais.
-- O CI instala dependências com `npm ci`.
-- O CI executa testes do frontend.
-- O CI gera o build do frontend.
-- O CI executa testes do backend.
-- O CI valida se os arquivos de deploy `render.yaml` e `vercel.json` existem.
-- O deploy contínuo acontece após merge na `main`, usando Vercel para o frontend e Render para o backend.
+- Frontend publicado na Vercel
+- Backend publicado no Render
+- Banco de dados no MongoDB Atlas
+- CI/CD com GitHub Actions
 
-## Como rodar o projeto
+## Funcionalidades implementadas
 
-Pré-requisitos:
+- Cadastro e login de usuários.
+- Autenticação com JWT.
+- Senhas protegidas com Argon2.
+- Rotas protegidas no frontend e backend.
+- CRUD de receitas.
+- Busca e filtro de receitas por categoria.
+- Comentários e avaliações em receitas.
+- Favoritos por usuário.
+- Lista de compras.
+- Histórico de receitas feitas.
+- Fluxo "Fazer Receita" com checklist de ingredientes.
+- Compartilhamento de receita por link ou Web Share API.
+- Mensagens de erro vindas da API nas telas de login e cadastro.
+- Testes automatizados no frontend e backend.
 
-- Node.js instalado, de preferência versão LTS.
-- Conta gratuita no MongoDB Atlas.
-- Cluster criado no MongoDB Atlas.
+## Estrutura do projeto
 
-### Instalar dependências
+```txt
+GerenciadorDeReceitas/
+  backend/
+    src/
+      config/
+      controllers/
+      middlewares/
+      models/
+      routes/
+      services/
+      tests/
+  frontend/
+    src/
+      components/
+      contexts/
+      layouts/
+      pages/
+      services/
+      tests/
+  .github/
+    workflows/
+  .env.example
+  render.yaml
+  vercel.json
+```
+
+## Como rodar localmente
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/juanpbarros/GerenciadorDeReceitas.git
+cd GerenciadorDeReceitas
+```
+
+### 2. Instalar dependências
 
 Na raiz do projeto:
 
@@ -96,7 +104,7 @@ Na raiz do projeto:
 npm install
 ```
 
-## Configurar variáveis de ambiente
+### 3. Configurar variáveis de ambiente
 
 Copie o arquivo de exemplo:
 
@@ -110,390 +118,178 @@ No Linux/macOS:
 cp .env.example .env
 ```
 
-Depois edite o `.env` com os valores reais:
+Depois edite o `.env` com seus dados:
 
 ```env
 PORT=3000
 MONGODB_URI=mongodb+srv://usuario:senha@cluster.mongodb.net/gerenciador-receitas?retryWrites=true&w=majority
-JWT_SECRET=troque-por-uma-chave-secreta-forte
+JWT_SECRET=sua_chave_secreta
+ALLOWED_ORIGINS=http://localhost:5173
 ```
 
-Para o frontend, o arquivo `frontend/.env.example` define:
+Para rodar localmente, o frontend usa `/api` por padrão, conforme `frontend/.env.example`.
 
-```env
-VITE_API_URL=/api
-```
+### 4. Rodar o backend
 
-Em desenvolvimento, esse valor usa o proxy do Vite para encaminhar chamadas `/api` para `http://localhost:3000`.
-
-## Configurar MongoDB Atlas
-
-No MongoDB Atlas:
-
-- Crie um cluster gratuito.
-- Crie um usuário de banco com senha forte.
-- Libere seu IP em **Network Access**.
-- Copie a connection string do cluster.
-- Substitua `usuario`, `senha` e `cluster` no `.env`.
-
-Para desenvolvimento escolar, é comum liberar temporariamente `0.0.0.0/0` no Atlas, mas isso permite conexão de qualquer IP. Use apenas se necessário e com senha forte.
-
-## Rodar o frontend
-
-```bash
-cd frontend
-npm run dev
-```
-
-Acesse:
-
-- `http://localhost:5173`
-
-Para usar login e cadastro reais pelo frontend, mantenha o backend rodando ao mesmo tempo.
-
-Fluxo sugerido:
-
-- Inicie o backend em `http://localhost:3000`.
-- Inicie o frontend em `http://localhost:5173`.
-- Acesse `/register` para criar uma conta real.
-- Use essa conta em `/login`.
-- Recarregue a página para validar a restauração da sessão via token.
-- Clique em logout para remover token e usuário salvos.
-
-## Rodar o backend
+Em um terminal:
 
 ```bash
 cd backend
 npm run dev
 ```
 
-A API sobe por padrão em:
-
-- `http://localhost:3000`
-
-Healthcheck:
-
-- `GET http://localhost:3000/api/health`
-
-Resposta esperada:
-
-```json
-{
-  "ok": true
-}
-```
-
-## Rotas da API
-
-### Saúde
-
-- `GET /api/health` — verifica se a API está respondendo.
-
-### Autenticação
-
-- `POST /api/auth/register` — cadastra usuário.
-- `POST /api/auth/login` — autentica usuário e retorna JWT.
-- `GET /api/auth/me` — retorna usuário logado, exigindo token Bearer.
-
-### Receitas
-
-- `GET /api/recipes` — lista receitas, exigindo token Bearer.
-- `GET /api/recipes?busca=bolo` — busca receitas por título ou descrição.
-- `GET /api/recipes?categoria=Sobremesa` — filtra receitas por categoria.
-- `GET /api/recipes/:id` — busca detalhes de uma receita.
-- `POST /api/recipes` — cria receita para o usuário logado.
-- `PATCH /api/recipes/:id` — edita receita do dono logado.
-- `DELETE /api/recipes/:id` — remove receita do dono logado.
-
-Exemplo de receita:
-
-```json
-{
-  "titulo": "Bolo de cenoura",
-  "descricao": "Receita simples para o café da tarde.",
-  "ingredientes": ["2 cenouras", "2 ovos", "1 xícara de açúcar"],
-  "modoPreparo": ["Bata os ingredientes", "Leve ao forno"],
-  "tempoPreparo": 45,
-  "categoria": "Sobremesa",
-  "imagemUrl": ""
-}
-```
-
-### Comentários
-
-- `GET /api/comments` — lista comentários.
-- `GET /api/comments?receita=idDaReceita` — lista comentários de uma receita.
-- `GET /api/comments/:id` — busca um comentário.
-- `POST /api/comments` — cria comentário, exigindo token Bearer.
-- `PUT /api/comments/:id` — edita comentário do autor logado, exigindo token Bearer.
-- `DELETE /api/comments/:id` — remove comentário do autor logado, exigindo token Bearer.
-
-Exemplo de comentário:
-
-```json
-{
-  "receita": "idDaReceita",
-  "texto": "Ficou muito bom.",
-  "nota": 5
-}
-```
-
-Exemplo de cadastro:
-
-```json
-{
-  "nome": "Maria",
-  "email": "maria@email.com",
-  "senha": "123456"
-}
-```
-
-Exemplo de uso do token:
+A API ficará disponível em:
 
 ```txt
-Authorization: Bearer seu_token_jwt
+http://localhost:3000
 ```
 
-## Testes automatizados
+Healthcheck local:
 
-Rodar testes do frontend:
+```txt
+http://localhost:3000/api/health
+```
+
+### 5. Rodar o frontend
+
+Em outro terminal:
 
 ```bash
 cd frontend
+npm run dev
+```
+
+O frontend ficará disponível em:
+
+```txt
+http://localhost:5173
+```
+
+## Como rodar os testes
+
+### Testes do frontend
+
+Na raiz do projeto:
+
+```bash
+npm --workspace frontend test -- --runInBand
+```
+
+Ou dentro da pasta `frontend`:
+
+```bash
 npm test
 ```
 
-Rodar testes do backend:
+### Testes do backend
+
+Na raiz do projeto:
 
 ```bash
-cd backend
+npm --workspace backend test
+```
+
+Ou dentro da pasta `backend`:
+
+```bash
 npm test
 ```
 
-Rodar build do frontend:
+### Build do frontend
+
+Na raiz do projeto:
 
 ```bash
-cd frontend
+npm --workspace frontend run build
+```
+
+Ou dentro da pasta `frontend`:
+
+```bash
 npm run build
 ```
 
-## GitHub Actions
+## Principais rotas da API
 
-A pipeline de CI/CD valida automaticamente os principais pontos antes de uma alteração entrar na `main`.
+### Autenticação
 
-Workflow:
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
 
-- Arquivo: `.github/workflows/ci.yml`
-- Versão do Node.js: `24`
-- Eventos:
-  - Pull Request para `main`
-  - Push na `main`
-- Comandos executados:
-  - `npm ci`
-  - `npm --workspace frontend test -- --runInBand`
-  - `npm --workspace frontend run build`
-  - `npm --workspace backend test`
-  - validação da existência de `render.yaml` e `vercel.json`
+### Receitas
 
-O GitHub Actions não faz o deploy diretamente. O deploy contínuo é feito pelos serviços conectados ao repositório:
+- `GET /api/recipes`
+- `POST /api/recipes`
+- `GET /api/recipes/:id`
+- `PATCH /api/recipes/:id`
+- `DELETE /api/recipes/:id`
 
-- Vercel publica o frontend quando há merge na `main`.
-- Render publica o backend quando há merge na `main`.
-- MongoDB Atlas mantém o banco de dados em nuvem usado pela API.
+### Comentários
 
-## Preparacao de deploy
+- `GET /api/comments`
+- `POST /api/comments`
+- `PUT /api/comments/:id`
+- `DELETE /api/comments/:id`
 
-O projeto foi preparado para deploy separado de backend e frontend.
+### Favoritos
 
-### Backend
+- `GET /api/favorites`
+- `POST /api/favorites/:recipeId`
+- `DELETE /api/favorites/:recipeId`
 
-Sugestao gratuita: Render Web Service.
+### Lista de compras
 
-Configuracoes esperadas:
+- `GET /api/shopping-lists`
+- `POST /api/shopping-lists`
+- `GET /api/shopping-lists/:id`
+- `PATCH /api/shopping-lists/:id`
+- `DELETE /api/shopping-lists/:id`
 
-- Arquivo de referencia: `render.yaml`.
-- Build command: `npm install`.
-- Start command: `npm --workspace backend start`.
-- Healthcheck: `/api/health`.
+### Histórico
 
-Variaveis de ambiente obrigatorias no servico de backend:
+- `GET /api/recipe-history`
+- `POST /api/recipe-history`
+- `GET /api/recipe-history/:id`
+- `PATCH /api/recipe-history/:id`
+- `DELETE /api/recipe-history/:id`
+
+## Deploy
+
+O deploy foi separado em três serviços:
+
+- Frontend: Vercel.
+- Backend: Render.
+- Banco de dados: MongoDB Atlas.
+
+Variáveis importantes em produção:
+
+### Frontend na Vercel
+
+```env
+VITE_API_URL=https://gerenciadordereceitas.onrender.com/api
+```
+
+### Backend no Render
 
 ```env
 NODE_ENV=production
-PORT=3000
 MONGODB_URI=sua_connection_string_do_mongodb_atlas
-JWT_SECRET=uma_chave_forte_e_secreta
-ALLOWED_ORIGINS=https://url-do-frontend-publicado
+JWT_SECRET=sua_chave_secreta
+ALLOWED_ORIGINS=https://gerenciador-de-receitas-frontend.vercel.app
 ```
 
-### Frontend
+Após merge na branch `main`, a Vercel e o Render fazem o deploy automaticamente.
 
-Sugestao gratuita: Vercel.
+## Segurança
 
-Configuracoes esperadas:
+- O arquivo `.env` real não deve ser versionado.
+- Credenciais do MongoDB Atlas e `JWT_SECRET` devem ficar apenas em variáveis de ambiente.
+- Senhas dos usuários são armazenadas como hash usando Argon2.
+- A API não retorna o hash da senha nas respostas.
 
-- Arquivo de referencia: `vercel.json`.
-- Install command: `npm install`.
-- Build command: `npm --workspace frontend run build`.
-- Output directory: `frontend/dist`.
+## Autores
 
-Variavel de ambiente obrigatoria no servico de frontend:
-
-```env
-VITE_API_URL=https://url-do-backend-publicado/api
-```
-
-### Ordem recomendada
-
-1. Publicar o backend primeiro.
-2. Copiar a URL publica do backend.
-3. Configurar `VITE_API_URL` no frontend com a URL do backend + `/api`.
-4. Publicar o frontend.
-5. Copiar a URL publica do frontend.
-6. Configurar `ALLOWED_ORIGINS` no backend com a URL do frontend.
-7. Reiniciar o backend e testar cadastro, login e rotas protegidas.
-
-### Cuidados de seguranca
-
-- Nunca colocar `MONGODB_URI` ou `JWT_SECRET` diretamente no codigo.
-- Usar secrets/variaveis de ambiente do servico de deploy.
-- Conferir `git status` antes de commitar alteracoes envolvendo deploy.
-- No MongoDB Atlas, liberar apenas os IPs necessarios quando possivel.
-- Se usar `0.0.0.0/0` no Atlas, manter senha forte e considerar restringir depois da apresentacao.
-
-## Funcionalidades concluidas e pendentes
-
-Concluidas:
-
-- Favoritos individuais por usuario.
-- Lista de compras persistida.
-- Historico persistido de receitas feitas.
-- Compartilhamento de receitas por link e Web Share API quando disponivel.
-- Fluxo Fazer Receita com checklist de ingredientes e envio de faltantes para lista de compras.
-
-Pendentes:
-
-- Executar deploy nos servicos escolhidos.
-
-## Roadmap incremental
-
-1. Executar deploy nos servicos escolhidos.
-2. Revisar o sistema completo para apresentacao.
-
-## Observacoes de regra de negocio
-
-- Categorias sao pre-definidas e nao terao CRUD proprio.
-- Ingredientes nao terao CRUD proprio; serao salvos como lista de strings dentro da receita.
-- Modo de preparo tambem sera salvo como lista de strings dentro da receita.
-- Receitas proprias aparecem como parte da biblioteca do usuario.
-- Receitas de outras pessoas adicionadas a biblioteca devem indicar o autor original.
-- O nome do autor original aparece apenas quando a receita foi adicionada de outra pessoa.
-
-## Seguranca e variaveis de ambiente
-
-- O arquivo `.env` real nao deve ser commitado.
-- Credenciais do MongoDB Atlas, `JWT_SECRET` e URLs de producao devem ficar apenas no ambiente local ou no servico de deploy.
-- O repositorio deve manter apenas exemplos seguros, como `.env.example`.
-- Antes de qualquer commit envolvendo backend, banco ou deploy, conferir `git status` para evitar subir segredos.
-- Nao use usuario administrador global do Atlas se nao for necessario.
-- Use senha forte para o usuario do banco.
-- Senhas de usuarios da aplicacao sao salvas apenas como hash.
-- A API nao retorna `passwordHash` nas respostas.
-
-## Atualizacao - Compartilhamento de receitas
-
-A pagina de detalhes da receita agora permite compartilhar receitas.
-
-- Usa Web Share API quando disponivel no navegador.
-- Usa copia do link para a area de transferencia como alternativa.
-- Exibe feedback de sucesso ou erro para o usuario.
-- Testes automatizados cobrem os dois fluxos.
-
-Pull Request relacionado:
-
-```txt
-Closes #31
-```
-
-## Atualizacao - Favoritos de receitas
-
-Os favoritos foram integrados com backend e frontend reais.
-
-- Backend: favoritos protegidos por JWT em `/api/favorites`.
-- Frontend: botao de estrela nas telas de receitas e detalhes.
-- Pagina `/favoritos` lista receitas favoritadas pela API real.
-- Favoritos sao individuais por usuario.
-- Testes automatizados cobrem API e integracao da tela.
-
-Pull Request relacionado:
-
-```txt
-Closes #29
-```
-
-## Atualizacao - Fazer Receita
-
-O fluxo Fazer Receita foi integrado na pagina de detalhes da receita.
-
-- Usuario pode abrir o modo de preparo com o botao `Fazer Receita`.
-- Ingredientes aparecem em checklist para marcar o que o usuario ja possui.
-- Ingredientes nao marcados aparecem na secao `Para comprar`.
-- Ingredientes faltantes podem ser enviados para uma nova lista de compras pela API real.
-- Testes automatizados cobrem checklist e criacao da lista de compras.
-
-Pull Request relacionado:
-
-```txt
-Closes #30
-```
-
-## Atualizacao - Preparacao de deploy
-
-O projeto foi preparado para publicacao em servicos gratuitos.
-
-- Backend aceita `ALLOWED_ORIGINS` para liberar o frontend publicado via CORS.
-- `.env.example` documenta as variaveis necessarias de producao.
-- `frontend/.env.example` documenta `VITE_API_URL` para apontar para a API publicada.
-- `render.yaml` registra uma configuracao base para backend no Render.
-- `vercel.json` registra uma configuracao base para frontend na Vercel.
-- README documenta ordem recomendada de publicacao e cuidados com secrets.
-
-Pull Request relacionado:
-
-```txt
-Closes #32
-```
-
-## Atualizacao - Revisao final
-
-Revisao final para apresentacao do trabalho escolar.
-
-- Documentacao revisada para remover textos quebrados na parte final do README.
-- Mensagens de erro de favoritos revisadas.
-- Seguranca de variaveis de ambiente conferida.
-- Testes e build devem passar antes do PR final.
-
-Pull Request relacionado:
-
-```txt
-Closes #33
-```
-
-## Atualizacao - Mensagens de autenticacao
-
-As telas de login e cadastro agora exibem mensagens de erro retornadas pela API.
-
-- Login mostra mensagens como `Credenciais invalidas.` quando a API retorna esse erro.
-- Cadastro mostra mensagens como `Email ja cadastrado.` quando o email informado ja existe.
-- As telas mantem mensagens genericas como fallback para erros inesperados.
-- Testes do frontend cobrem as mensagens reais da API nas telas de autenticacao.
-
-## Atualizacao - CI/CD
-
-A pipeline do projeto foi atualizada para validar o sistema com versões atuais.
-
-- GitHub Actions usa Node.js 24.
-- Actions principais foram atualizadas para versões recentes.
-- A pipeline executa testes do frontend, build do frontend e testes do backend.
-- O workflow valida a presença dos arquivos `render.yaml` e `vercel.json`.
-- O README documenta que o deploy contínuo ocorre pela integração da Vercel e do Render com a branch `main`.
+- Juan Barros
+- Rafaela Fayad
+- Luís Borges
