@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   pull_request:
@@ -14,16 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Baixar repositório
-        uses: actions/checkout@v4
+      - name: Baixar repositorio
+        uses: actions/checkout@v6
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
-      - name: Instalar dependências
+      - name: Instalar dependencias
         run: npm ci
 
       - name: Rodar testes do frontend
@@ -34,3 +34,8 @@ jobs:
 
       - name: Rodar testes do backend
         run: npm --workspace backend test
+
+      - name: Validar arquivos de deploy
+        run: |
+          test -f render.yaml
+          test -f vercel.json

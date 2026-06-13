@@ -12,7 +12,7 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Testes:
   - Frontend: Jest + React Testing Library
   - Backend: Jest + Supertest
-- CI: GitHub Actions
+- CI/CD: GitHub Actions, Vercel e Render
 
 ## Estrutura do repositório
 
@@ -67,15 +67,18 @@ Sistema web de receitas desenvolvido de forma **incremental**, em etapas pequena
 - Middleware central de erro.
 - Testes automatizados com Jest + Supertest, incluindo validações dos models base e rotas de comentários.
 
-### Integração contínua
+### Integração contínua e deploy contínuo
 
-- Workflow de CI configurado em `.github/workflows/ci.yml`.
+- Workflow de CI/CD configurado em `.github/workflows/ci.yml`.
 - A pipeline roda automaticamente em Pull Requests para `main`.
 - A pipeline também roda em pushes para `main`.
+- O workflow usa Node.js 24 e actions atuais.
 - O CI instala dependências com `npm ci`.
 - O CI executa testes do frontend.
 - O CI gera o build do frontend.
 - O CI executa testes do backend.
+- O CI valida se os arquivos de deploy `render.yaml` e `vercel.json` existem.
+- O deploy contínuo acontece após merge na `main`, usando Vercel para o frontend e Render para o backend.
 
 ## Como rodar o projeto
 
@@ -276,11 +279,12 @@ npm run build
 
 ## GitHub Actions
 
-A CI do projeto valida automaticamente os principais pontos antes de uma alteração entrar na `main`.
+A pipeline de CI/CD valida automaticamente os principais pontos antes de uma alteração entrar na `main`.
 
 Workflow:
 
 - Arquivo: `.github/workflows/ci.yml`
+- Versão do Node.js: `24`
 - Eventos:
   - Pull Request para `main`
   - Push na `main`
@@ -289,7 +293,13 @@ Workflow:
   - `npm --workspace frontend test -- --runInBand`
   - `npm --workspace frontend run build`
   - `npm --workspace backend test`
+  - validação da existência de `render.yaml` e `vercel.json`
 
+O GitHub Actions não faz o deploy diretamente. O deploy contínuo é feito pelos serviços conectados ao repositório:
+
+- Vercel publica o frontend quando há merge na `main`.
+- Render publica o backend quando há merge na `main`.
+- MongoDB Atlas mantém o banco de dados em nuvem usado pela API.
 
 ## Preparacao de deploy
 
@@ -477,3 +487,13 @@ As telas de login e cadastro agora exibem mensagens de erro retornadas pela API.
 - Cadastro mostra mensagens como `Email ja cadastrado.` quando o email informado ja existe.
 - As telas mantem mensagens genericas como fallback para erros inesperados.
 - Testes do frontend cobrem as mensagens reais da API nas telas de autenticacao.
+
+## Atualizacao - CI/CD
+
+A pipeline do projeto foi atualizada para validar o sistema com versões atuais.
+
+- GitHub Actions usa Node.js 24.
+- Actions principais foram atualizadas para versões recentes.
+- A pipeline executa testes do frontend, build do frontend e testes do backend.
+- O workflow valida a presença dos arquivos `render.yaml` e `vercel.json`.
+- O README documenta que o deploy contínuo ocorre pela integração da Vercel e do Render com a branch `main`.
