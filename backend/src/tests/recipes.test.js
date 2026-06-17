@@ -110,7 +110,7 @@ describe('recipe routes', () => {
     })
   })
 
-  it('lists recipes with creator data', async () => {
+  it('lists only recipes from the authenticated user by default', async () => {
     const recipes = [
       makeRecipe({
         usuarioCriador: {
@@ -128,7 +128,7 @@ describe('recipe routes', () => {
 
     expect(response.status).toBe(200)
     expect(response.body.recipes).toEqual(recipes)
-    expect(recipeFind).toHaveBeenCalledWith({})
+    expect(recipeFind).toHaveBeenCalledWith({ usuarioCriador: authUser._id })
     expect(populate).toHaveBeenCalledWith('usuarioCriador', 'nome email')
     expect(sort).toHaveBeenCalledWith({ createdAt: -1 })
   })

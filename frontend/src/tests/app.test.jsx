@@ -100,6 +100,7 @@ const API_RECIPES = [
     preparationSteps: ['Bata tudo', 'Leve ao forno'],
     prepTimeMinutes: 45,
     category: 'Sobremesa',
+    creator: AUTH_USER,
     origin: 'own',
     sourceName: null,
     rating: 0,
@@ -112,11 +113,19 @@ const API_RECIPES = [
     preparationSteps: ['Cozinhe o macarrão', 'Doure o alho'],
     prepTimeMinutes: 20,
     category: 'Massas',
+    creator: AUTH_USER,
     origin: 'own',
     sourceName: null,
     rating: 0,
   },
 ]
+
+const OTHER_USER_RECIPE = {
+  ...API_RECIPES[0],
+  id: 'bolo-chocolate',
+  title: 'Bolo de chocolate',
+  creator: { _id: '99', nome: 'Luis', email: 'luis@email.com' },
+}
 
 const API_HISTORY = [
   {
@@ -607,6 +616,18 @@ describe('recipe details', () => {
 
     expect(deleteRecipeRequest).toHaveBeenCalledWith('bolo-cenoura')
     expect(await screen.findByRole('heading', { name: /minha biblioteca de receitas/i })).toBeInTheDocument()
+  })
+
+  it('does not show edit and delete actions for recipes from another user', async () => {
+    getRecipeRequest.mockResolvedValue({ recipe: OTHER_USER_RECIPE })
+
+    setRoute('/receitas/bolo-chocolate')
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: /Bolo de chocolate/i })).toBeInTheDocument()
+    expect(screen.getByText(/receita de luis/i)).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /editar/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /excluir/i })).not.toBeInTheDocument()
   })
 })
 

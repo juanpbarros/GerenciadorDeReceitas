@@ -23,11 +23,12 @@ export async function createRecipe(req, res) {
 
 export async function listRecipes(req, res) {
   const { busca, categoria } = req.query
-  const filters = {}
+  const hasSearch = Boolean(busca?.trim())
+  const filters = hasSearch ? {} : { usuarioCriador: req.user._id }
 
   if (categoria) filters.categoria = categoria
 
-  if (busca) {
+  if (hasSearch) {
     filters.$or = [
       { titulo: { $regex: busca, $options: 'i' } },
       { descricao: { $regex: busca, $options: 'i' } },

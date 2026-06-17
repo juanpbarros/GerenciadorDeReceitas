@@ -4,6 +4,7 @@ import FilterBar from '../components/FilterBar'
 import RecipeCard from '../components/RecipeCard'
 import SearchBar from '../components/SearchBar'
 import { RECIPE_CATEGORIES } from '../data/mockRecipes'
+import { useAuth } from '../hooks/useAuth'
 import {
   addFavoriteRequest,
   listFavoritesRequest,
@@ -12,6 +13,7 @@ import {
 import { listRecipesRequest } from '../services/recipeApi'
 
 export default function Recipes() {
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [recipes, setRecipes] = useState([])
@@ -123,6 +125,7 @@ export default function Recipes() {
             <div className="col-12 col-md-6 col-xl-4" key={recipe.id}>
               <RecipeCard
                 recipe={recipe}
+                currentUserId={user?._id}
                 isFavorite={favoriteIds.includes(recipe.id)}
                 isFavoriteLoading={favoriteLoadingId === recipe.id}
                 onToggleFavorite={() => handleToggleFavorite(recipe)}

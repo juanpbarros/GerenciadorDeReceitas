@@ -3,11 +3,16 @@ import FavoriteButton from './FavoriteButton'
 import StarRating from './StarRating'
 
 export default function RecipeCard({
+  currentUserId = '',
   isFavorite = false,
   isFavoriteLoading = false,
   onToggleFavorite,
   recipe,
 }) {
+  const creatorId = recipe.creator?._id || recipe.creator?.id || recipe.creator
+  const isOwner = creatorId && currentUserId && creatorId.toString() === currentUserId.toString()
+  const shouldShowCreator = creatorId && !isOwner && recipe.creator?.nome
+
   return (
     <article className="recipe-card h-100">
       <div className="recipe-card-body">
@@ -31,10 +36,10 @@ export default function RecipeCard({
             <span>{recipe.prepTimeMinutes} min</span>
             <span>•</span>
             <span>{recipe.ingredients.length} ingredientes</span>
-            {recipe.origin === 'imported' && recipe.sourceName && (
+            {shouldShowCreator && (
               <>
                 <span>•</span>
-                <span>Receita de {recipe.sourceName}</span>
+                <span>Receita de {recipe.creator.nome}</span>
               </>
             )}
           </div>
