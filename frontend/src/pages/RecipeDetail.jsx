@@ -41,6 +41,8 @@ export default function RecipeDetail() {
   const missingIngredients = recipe
     ? recipe.ingredients.filter((ingredient) => !ownedIngredients.includes(ingredient))
     : []
+  const creatorId = recipe?.creator?._id || recipe?.creator?.id || recipe?.creator
+  const isOwner = Boolean(creatorId && user?._id && creatorId.toString() === user._id.toString())
 
   useEffect(() => {
     let isMounted = true
@@ -236,8 +238,8 @@ export default function RecipeDetail() {
           <span className="badge text-bg-light border mb-2">{recipe.category}</span>
           <h2 className="h4 mb-1">{recipe.title}</h2>
           <p className="text-secondary mb-0">{recipe.description}</p>
-          {recipe.origin === 'imported' && recipe.sourceName && (
-            <p className="text-secondary small mt-2 mb-0">Receita de {recipe.sourceName}</p>
+          {!isOwner && recipe.creator?.nome && (
+            <p className="text-secondary small mt-2 mb-0">Receita de {recipe.creator.nome}</p>
           )}
         </div>
         <div className="d-flex flex-wrap gap-2">
@@ -253,12 +255,16 @@ export default function RecipeDetail() {
           <button type="button" className="btn btn-dark" onClick={handleToggleCookingMode}>
             {isCookingMode ? 'Fechar preparo' : 'Fazer Receita'}
           </button>
-          <Link to={`/receitas/${id}/editar`} className="btn btn-outline-dark">
-            Editar
-          </Link>
-          <button type="button" className="btn btn-outline-danger" onClick={handleDelete} disabled={isDeleting}>
-            {isDeleting ? 'Excluindo...' : 'Excluir'}
-          </button>
+          {isOwner && (
+            <>
+              <Link to={`/receitas/${id}/editar`} className="btn btn-outline-dark">
+                Editar
+              </Link>
+              <button type="button" className="btn btn-outline-danger" onClick={handleDelete} disabled={isDeleting}>
+                {isDeleting ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
